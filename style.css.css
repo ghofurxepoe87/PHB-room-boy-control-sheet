@@ -1,0 +1,32 @@
+.bg-platinum-navy { background-color: #0b192c; }
+.bg-platinum-card { background-color: #1e2e45; }
+.border-platinum-gold { border-color: #d4af37; }
+.text-platinum-gold { color: #d4af37; }
+.bg-platinum-gold { background-color: #d4af37; }
+
+table.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+table.custom-table th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    padding: 10px 12px;
+    border-bottom: 2px solid #e2e8f0;
+    text-align: left;
+}
+
+table.custom-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+@media print {
+    body { background: white !important; color: black !important; }
+    .no-print { display: none !important; }
+    .print-only { display: block !important; }
+}
