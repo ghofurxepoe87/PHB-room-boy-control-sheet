@@ -3,317 +3,529 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Room Boy Control Sheet & Housekeeping Log - Platinum Hotel</title>
+    <title>Room Boy Control Sheet & Log - Platinum Hotel Balikpapan</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Library Supabase JS (Versi Universal Tanpa Ribet) -->
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- SheetJS (Export Excel .xlsx) -->
+    <!-- SheetJS (Export Excel) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- html2pdf.js (Export PDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* Custom scrollbar untuk list linen & amenities */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-800 font-sans min-h-screen p-2 md:p-6">
+<body class="bg-[#0b1329] text-slate-800 font-sans min-h-screen p-2 md:p-6 flex flex-col justify-between">
 
-    <div class="max-w-7xl mx-auto bg-slate-50 min-h-screen rounded-2xl shadow-2xl overflow-hidden flex flex-col justify-between">
+    <!-- Container Utama -->
+    <div class="max-w-6xl mx-auto w-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-700/50 flex flex-col">
         
-        <!-- HEADER HOTEL -->
-        <header class="bg-slate-950 text-white p-4 md:p-6 border-b-2 border-amber-500 flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-2xl font-serif text-amber-400 font-black">
-                    P
+        <!-- HEADER HOTEL PERSIS GAMBAR -->
+        <header class="bg-[#0d162d] text-white p-5 border-b border-slate-800 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-4">
+                <!-- Logo Bunga Emas Platinum -->
+                <div class="w-12 h-12 rounded-full bg-amber-400/10 border-2 border-amber-400/80 flex items-center justify-center text-amber-400">
+                    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C13.5 6 18 7.5 22 9C18 10.5 13.5 12 12 16C10.5 12 6 10.5 2 9C6 7.5 10.5 6 12 2Z" />
+                        <path d="M12 22C10.5 18 6 16.5 2 15C6 13.5 10.5 12 12 8C13.5 12 18 13.5 22 15C18 16.5 13.5 18 12 22Z" opacity="0.6"/>
+                    </svg>
                 </div>
                 <div>
-                    <h1 class="text-base md:text-xl font-bold font-serif uppercase tracking-widest text-amber-400">
+                    <h1 class="text-base md:text-lg font-bold font-serif uppercase tracking-widest text-white">
                         Platinum Hotel & Convention Hall
                     </h1>
-                    <p class="text-xs text-slate-300 font-medium">Housekeeping Department • Room Boy Control Sheet (Akses Terbuka)</p>
+                    <p class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Balikpapan</p>
+                    <div class="h-[1px] bg-slate-700 w-full my-1"></div>
+                    <p class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                        <span>📋</span> ROOM BOY CONTROL SHEET & LOG
+                    </p>
                 </div>
             </div>
 
-            <!-- TOMBOL FITUR LENGKAP -->
-            <div class="flex flex-wrap items-center gap-2">
-                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
-                    📊 Export Excel (.xlsx)
-                </button>
-                <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
-                    📄 Unduh PDF
-                </button>
-                <button onclick="shareToWhatsApp()" class="bg-green-500 hover:bg-green-600 text-slate-950 text-xs font-extrabold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
-                    💬 Kirim ke WA
+            <!-- Profile Badge & Shift -->
+            <div class="bg-[#15213f] border border-slate-700/70 rounded-xl px-4 py-2.5 flex items-center gap-4 shadow-inner">
+                <div>
+                    <div class="text-xs font-bold text-purple-300 flex items-center gap-1">
+                        <span>👤</span> <span id="currentUserName">toni</span>
+                    </div>
+                    <div class="text-[11px] text-sky-400 mt-0.5 flex items-center gap-1">
+                        <span>🗓️</span> <span id="currentDateDisplay">27/09/26</span> 
+                        <span class="text-slate-500">|</span> 
+                        <span class="text-slate-300">Shift:</span> 
+                        <span id="currentShiftDisplay" class="text-amber-400 font-bold">Pagi</span>
+                    </div>
+                </div>
+                <!-- Tombol Ganti Petugas (Tanpa Password) -->
+                <button onclick="promptUserChange()" class="bg-[#42171d] hover:bg-rose-900 text-rose-200 border border-rose-700/40 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition">
+                    <span>🚪</span> Ganti Shift
                 </button>
             </div>
         </header>
 
-        <!-- KARTU STATUS REAL-TIME (KPI) -->
-        <section class="bg-slate-900 text-white p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 border-b border-slate-800">
-            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-center">
-                <span class="text-[11px] text-slate-400 font-semibold block uppercase">Total Kamar</span>
-                <span id="statTotal" class="text-xl font-black text-amber-400">0</span>
-            </div>
-            <div class="bg-emerald-950/40 p-3 rounded-xl border border-emerald-500/30 text-center">
-                <span class="text-[11px] text-emerald-300 font-semibold block uppercase">Clean (VC)</span>
-                <span id="statVC" class="text-xl font-black text-emerald-400">0</span>
-            </div>
-            <div class="bg-rose-950/40 p-3 rounded-xl border border-rose-500/30 text-center">
-                <span class="text-[11px] text-rose-300 font-semibold block uppercase">Dirty (VD)</span>
-                <span id="statVD" class="text-xl font-black text-rose-400">0</span>
-            </div>
-            <div class="bg-blue-950/40 p-3 rounded-xl border border-blue-500/30 text-center">
-                <span class="text-[11px] text-blue-300 font-semibold block uppercase">Occupied</span>
-                <span id="statOccupied" class="text-xl font-black text-blue-400">0</span>
-            </div>
-            <div class="bg-amber-950/40 p-3 rounded-xl border border-amber-500/30 text-center">
-                <span class="text-[11px] text-amber-300 font-semibold block uppercase">DND / SO</span>
-                <span id="statDND" class="text-xl font-black text-amber-400">0</span>
-            </div>
-            <div class="bg-purple-950/40 p-3 rounded-xl border border-purple-500/30 text-center">
-                <span class="text-[11px] text-purple-300 font-semibold block uppercase">Maintenance</span>
-                <span id="statOOO" class="text-xl font-black text-purple-400">0</span>
-            </div>
-        </section>
+        <!-- NAVIGATION TABS -->
+        <nav class="bg-white border-b border-slate-200 flex overflow-x-auto text-xs font-bold">
+            <button onclick="switchTab('tab-step1')" id="nav-step1" class="tab-btn py-3 px-6 text-amber-600 border-b-2 border-amber-500 flex items-center gap-2 outline-none">
+                <span>🛏️</span> 1. Linen & Supplies
+            </button>
+            <button onclick="switchTab('tab-step2')" id="nav-step2" class="tab-btn py-3 px-6 text-slate-500 hover:text-slate-800 flex items-center gap-2 outline-none">
+                <span>🚪</span> 2. Input Kamar
+            </button>
+            <button onclick="switchTab('tab-logs')" id="nav-logs" class="tab-btn py-3 px-6 text-slate-500 hover:text-slate-800 flex items-center gap-2 outline-none">
+                <span>📋</span> Log Hari Ini (<span id="logCountBadge">0</span>)
+            </button>
+            <button onclick="switchTab('tab-report')" id="nav-report" class="tab-btn py-3 px-6 text-slate-500 hover:text-slate-800 flex items-center gap-2 outline-none">
+                <span>📊</span> Laporan Global
+            </button>
+        </nav>
 
-        <!-- KONTEN UTAMA -->
-        <main class="p-4 md:p-6 space-y-6 flex-1">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- KONTEN TAB -->
+        <div class="p-4 md:p-6 bg-[#f8fafc] flex-1">
+            
+            <!-- ================= TAB 1: LINEN & SUPPLIES (PERSIS TAMPILAN GAMBAR) ================= -->
+            <div id="tab-step1" class="tab-content space-y-5">
                 
-                <!-- FORM INPUT DATA (KIRI) -->
-                <div class="lg:col-span-4 bg-white p-5 rounded-2xl shadow border border-slate-200">
-                    <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">
-                            ✍️ Input Room Control
+                <!-- Banner Step 1 -->
+                <div class="bg-[#0e172e] text-white p-4 rounded-xl border border-slate-800 flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                        <h2 class="text-xs md:text-sm font-black text-amber-400 tracking-wide uppercase">
+                            Langkah 1: Input Real Linen & Amenities
                         </h2>
-                        <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Bebas Login</span>
+                        <p class="text-[11px] text-slate-300">
+                            Catat pemakaian barang di kamar sebelum menyelesaikan status kamar
+                        </p>
+                    </div>
+                    <span class="bg-[#1b2644] border border-amber-500/40 text-amber-300 text-[11px] font-bold px-3 py-1 rounded-full">
+                        Langkah 1 dari 2
+                    </span>
+                </div>
+
+                <!-- Grid 2 Kolom Kontrol -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    
+                    <!-- Kolom Kiri: Kontrol Linen Platinum -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center border-b pb-3 mb-3">
+                                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider">
+                                    Kontrol Linen Platinum
+                                </h3>
+                                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-slate-200">
+                                    Bersih / Kotor
+                                </span>
+                            </div>
+
+                            <!-- List Item Linen dengan Scrollbar -->
+                            <div id="linenListContainer" class="space-y-2.5 max-h-[340px] overflow-y-auto pr-1.5 custom-scroll">
+                                <!-- Rendered by JavaScript -->
+                            </div>
+                        </div>
                     </div>
 
-                    <form id="roomLogForm" class="space-y-3 text-xs">
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block font-bold text-slate-700 mb-1">Tanggal</label>
-                                <input type="date" id="entryDate" required class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-semibold">
-                            </div>
-                            <div>
-                                <label class="block font-bold text-slate-700 mb-1">Shift</label>
-                                <select id="entryShift" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-semibold">
-                                    <option value="Pagi">Pagi</option>
-                                    <option value="Siang">Siang</option>
-                                    <option value="Malam">Malam</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-2">
-                            <div>
-                                <label class="block font-bold text-slate-700 mb-1">No Kamar</label>
-                                <input type="text" id="roomNumber" required placeholder="Contoh: 301" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-black text-slate-900 outline-none">
-                            </div>
-                            <div>
-                                <label class="block font-bold text-slate-700 mb-1">Lantai</label>
-                                <input type="text" id="roomFloor" placeholder="Lt 3" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
-                            </div>
-                            <div>
-                                <label class="block font-bold text-slate-700 mb-1">Tipe</label>
-                                <select id="roomType" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
-                                    <option value="Superior">Superior</option>
-                                    <option value="Deluxe">Deluxe</option>
-                                    <option value="Executive">Executive</option>
-                                    <option value="Suite">Suite</option>
-                                </select>
-                            </div>
-                        </div>
-
+                    <!-- Kolom Kanan: Guest Amenities & Supplies -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
                         <div>
-                            <label class="block font-bold text-slate-700 mb-1">Status Kamar</label>
-                            <select id="roomStatus" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg font-bold outline-none text-slate-800">
-                                <option value="VC">VC - Vacant Clean (Siap Huni)</option>
+                            <div class="flex justify-between items-center border-b pb-3 mb-3">
+                                <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider">
+                                    Guest Amenities & Supplies
+                                </h3>
+                                <span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-200">
+                                    Pemakaian Supplies
+                                </span>
+                            </div>
+
+                            <!-- List Item Amenities dengan Scrollbar -->
+                            <div id="amenitiesListContainer" class="space-y-2.5 max-h-[340px] overflow-y-auto pr-1.5 custom-scroll">
+                                <!-- Rendered by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Tombol Lanjut ke Langkah 2 (Persis Gambar) -->
+                <button onclick="switchTab('tab-step2')" class="w-full bg-[#f59e0b] hover:bg-amber-600 text-slate-950 font-black py-3.5 px-4 rounded-xl shadow-md text-xs md:text-sm tracking-wide transition uppercase flex items-center justify-center gap-2">
+                    <span>Lanjut ke Langkah 2: Input Parameter Kamar ➡️</span>
+                </button>
+            </div>
+
+
+            <!-- ================= TAB 2: INPUT PARAMETER KAMAR ================= -->
+            <div id="tab-step2" class="tab-content hidden space-y-5">
+                <div class="bg-[#0e172e] text-white p-4 rounded-xl border border-slate-800 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xs md:text-sm font-black text-amber-400 tracking-wide uppercase">
+                            Langkah 2: Lengkapi Parameter Kamar & Simpan
+                        </h2>
+                        <p class="text-[11px] text-slate-300">
+                            Masukkan detail kamar yang telah dikerjakan oleh Room Boy
+                        </p>
+                    </div>
+                    <span class="bg-[#1b2644] border border-amber-500/40 text-amber-300 text-[11px] font-bold px-3 py-1 rounded-full">
+                        Langkah 2 dari 2
+                    </span>
+                </div>
+
+                <form id="roomForm" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4 text-xs">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Nomor Kamar</label>
+                            <input type="text" id="formRoomNumber" required placeholder="Contoh: 301" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg font-bold text-base text-slate-900 outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Lantai</label>
+                            <input type="text" id="formFloor" placeholder="Contoh: Lt. 3" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Tipe Kamar</label>
+                            <select id="formRoomType" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg font-semibold outline-none">
+                                <option value="Superior">Superior Room</option>
+                                <option value="Deluxe">Deluxe Room</option>
+                                <option value="Executive">Executive Club</option>
+                                <option value="Junior Suite">Junior Suite</option>
+                                <option value="Platinum Suite">Platinum Suite</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Status Akhir Kamar</label>
+                            <select id="formRoomStatus" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg font-black text-slate-900 outline-none">
+                                <option value="VC">VC - Vacant Clean (Siap Dijual)</option>
                                 <option value="VD">VD - Vacant Dirty (Kotor Kosong)</option>
-                                <option value="OD">OD - Occupied Dirty (Kotor Terisi)</option>
-                                <option value="OC">OC - Occupied Clean (Bersih Terisi)</option>
+                                <option value="OC">OC - Occupied Clean (Terisi Bersih)</option>
+                                <option value="OD">OD - Occupied Dirty (Terisi Kotor)</option>
                                 <option value="DND">DND - Do Not Disturb</option>
                                 <option value="SO">SO - Sleep Out</option>
                                 <option value="OOO">OOO - Out of Order (Rusak)</option>
                             </select>
                         </div>
-
-                        <div class="grid grid-cols-3 gap-2">
-                            <div>
-                                <label class="block font-bold text-slate-700 mb-1">Room Boy</label>
-                                <input type="text" id="roomBoyName" required placeholder="Nama" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-semibold">
-                            </div>
-                            <div>
-                                <label class="block font-bold text-slate-700 mb-1">In</label>
-                                <input type="time" id="timeIn" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
-                            </div>
-                            <div>
-                                <label class="block font-bold text-slate-700 mb-1">Out</label>
-                                <input type="time" id="timeOut" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
-                            </div>
-                        </div>
-
                         <div>
-                            <label class="block font-bold text-slate-700 mb-1">Ganti Linen / Towel</label>
-                            <div class="flex flex-wrap gap-2 text-[11px] bg-slate-50 p-2 rounded-lg border border-slate-200">
-                                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenSheet" value="Sheet"> Sheet</label>
-                                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenDuvet" value="Duvet"> Duvet</label>
-                                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenTowel" value="Towel"> Towel</label>
-                                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenMat" value="Mat"> Mat</label>
-                            </div>
+                            <label class="block font-bold text-slate-700 mb-1">Jam Masuk (Time In)</label>
+                            <input type="time" id="formTimeIn" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none font-medium">
                         </div>
-
                         <div>
-                            <label class="block font-bold text-slate-700 mb-1">Kerusakan / Engineering</label>
-                            <input type="text" id="roomMaintenance" placeholder="Contoh: AC kurang dingin, kran bocor" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
-                        </div>
-
-                        <div>
-                            <label class="block font-bold text-slate-700 mb-1">Catatan Tambahan (Remarks)</label>
-                            <textarea id="roomRemarks" rows="2" placeholder="Catatan opsional..." class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none"></textarea>
-                        </div>
-
-                        <button type="submit" id="btnSubmit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl shadow-lg uppercase tracking-wider transition">
-                            💾 Simpan Log Kamar
-                        </button>
-                    </form>
-                </div>
-
-                <!-- TABEL DATA (KANAN) -->
-                <div class="lg:col-span-8 bg-white p-5 rounded-2xl shadow border border-slate-200 flex flex-col justify-between">
-                    <div>
-                        <!-- Filter Pencarian -->
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4 flex flex-wrap items-center justify-between gap-2 text-xs">
-                            <div class="flex flex-wrap items-center gap-2 flex-1">
-                                <input type="text" id="searchRoom" oninput="applyFilters()" placeholder="🔍 Cari Kamar / Petugas..." class="p-2 border border-slate-300 rounded-lg outline-none w-44">
-                                <select id="filterStatus" onchange="applyFilters()" class="p-2 border border-slate-300 rounded-lg outline-none font-semibold">
-                                    <option value="">Semua Status</option>
-                                    <option value="VC">VC - Clean</option>
-                                    <option value="VD">VD - Dirty</option>
-                                    <option value="OD">OD - Occupied Dirty</option>
-                                    <option value="OC">OC - Occupied Clean</option>
-                                    <option value="DND">DND</option>
-                                    <option value="OOO">OOO</option>
-                                </select>
-                            </div>
-                            <button onclick="fetchLogs()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-3 py-2 rounded-lg font-bold transition">
-                                🔄 Segarkan
-                            </button>
-                        </div>
-
-                        <!-- Area Tabel & Cetak PDF -->
-                        <div id="printArea" class="overflow-x-auto">
-                            <!-- Header Khusus saat PDF dicetak -->
-                            <div id="pdfHeader" class="hidden text-center pb-4 mb-4 border-b-2 border-slate-800">
-                                <h2 class="text-xl font-serif font-black uppercase text-slate-900">Platinum Hotel & Convention Hall</h2>
-                                <h3 class="text-sm font-bold uppercase text-slate-700">Room Boy Daily Control Sheet</h3>
-                                <p id="pdfDate" class="text-xs text-slate-500 mt-1"></p>
-                            </div>
-
-                            <table class="w-full text-left text-xs border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-800 text-white uppercase text-[10px] tracking-wider">
-                                        <th class="p-2.5 rounded-l-lg">Tanggal / Shift</th>
-                                        <th class="p-2.5">Kamar</th>
-                                        <th class="p-2.5">Status</th>
-                                        <th class="p-2.5">Room Boy</th>
-                                        <th class="p-2.5">In - Out</th>
-                                        <th class="p-2.5">Linen</th>
-                                        <th class="p-2.5">Kerusakan / Remarks</th>
-                                        <th class="p-2.5 text-center rounded-r-lg action-col">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="logTableBody" class="divide-y divide-slate-100">
-                                    <tr>
-                                        <td colspan="8" class="p-8 text-center text-slate-400">Memuat data log kamar...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <label class="block font-bold text-slate-700 mb-1">Jam Keluar (Time Out)</label>
+                            <input type="time" id="formTimeOut" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none font-medium">
                         </div>
                     </div>
 
-                    <div class="mt-4 pt-3 border-t text-[11px] text-slate-500 flex justify-between items-center">
-                        <span>Status: Cloud Terhubung ke Supabase</span>
-                        <span class="font-bold text-slate-700">Platinum Hotel Housekeeping</span>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Laporan Kerusakan / Engineering (Opsional)</label>
+                        <input type="text" id="formMaintenance" placeholder="Contoh: AC bocor, shower air panas mati" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none text-slate-800">
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Catatan Tambahan (Remarks)</label>
+                        <textarea id="formRemarks" rows="2" placeholder="Catatan khusus kamar..." class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none"></textarea>
+                    </div>
+
+                    <!-- Ringkasan Barang yang Diinput di Langkah 1 -->
+                    <div class="bg-amber-50/70 border border-amber-200 p-3 rounded-xl">
+                        <span class="font-bold text-amber-900 block mb-1 text-[11px]">📦 Ringkasan Input Barang (Langkah 1):</span>
+                        <div id="previewItems" class="text-[11px] text-slate-600 font-mono">
+                            Belum ada barang diubah dari angka default.
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-2">
+                        <button type="button" onclick="switchTab('tab-step1')" class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl transition">
+                            ⬅️ Kembali ke Langkah 1
+                        </button>
+                        <button type="submit" id="btnSubmitAll" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-3 rounded-xl shadow-lg uppercase tracking-wider transition">
+                            💾 Selesaikan & Simpan Log Kamar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+
+            <!-- ================= TAB 3: LOG HARI INI ================= -->
+            <div id="tab-logs" class="tab-content hidden space-y-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap justify-between items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="logSearchInput" oninput="filterLogs()" placeholder="🔍 Cari Nomor Kamar..." class="p-2 border border-slate-300 rounded-lg text-xs outline-none w-48">
+                        <select id="logFilterStatus" onchange="filterLogs()" class="p-2 border border-slate-300 rounded-lg text-xs font-semibold outline-none">
+                            <option value="">Semua Status</option>
+                            <option value="VC">VC - Clean</option>
+                            <option value="VD">VD - Dirty</option>
+                            <option value="OD">OD - Occupied Dirty</option>
+                            <option value="OC">OC - Occupied Clean</option>
+                            <option value="DND">DND</option>
+                            <option value="OOO">OOO</option>
+                        </select>
+                    </div>
+                    <button onclick="fetchSupabaseLogs()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-3 py-2 rounded-lg border border-slate-300 transition">
+                        🔄 Refresh Data
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900 text-white uppercase text-[10px] tracking-wider">
+                                <th class="p-3">Waktu</th>
+                                <th class="p-3">Kamar</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3">Room Boy</th>
+                                <th class="p-3">Pemakaian Linen & Amenities</th>
+                                <th class="p-3">Remarks / Maint</th>
+                                <th class="p-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody" class="divide-y divide-slate-100">
+                            <tr>
+                                <td colspan="7" class="p-8 text-center text-slate-400">Memuat log kamar...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <!-- ================= TAB 4: LAPORAN GLOBAL & EXPORT ================= -->
+            <div id="tab-report" class="tab-content hidden space-y-5">
+                
+                <!-- KPI Counter -->
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-3">
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 text-center shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Total Kamar</span>
+                        <div id="kpiTotal" class="text-xl font-black text-slate-800">0</div>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-center shadow-sm">
+                        <span class="text-[10px] font-bold text-emerald-700 uppercase">Clean (VC)</span>
+                        <div id="kpiVC" class="text-xl font-black text-emerald-700">0</div>
+                    </div>
+                    <div class="bg-rose-50 p-3 rounded-xl border border-rose-200 text-center shadow-sm">
+                        <span class="text-[10px] font-bold text-rose-700 uppercase">Dirty (VD)</span>
+                        <div id="kpiVD" class="text-xl font-black text-rose-700">0</div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-xl border border-blue-200 text-center shadow-sm">
+                        <span class="text-[10px] font-bold text-blue-700 uppercase">Occupied</span>
+                        <div id="kpiOccupied" class="text-xl font-black text-blue-700">0</div>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-center shadow-sm">
+                        <span class="text-[10px] font-bold text-amber-700 uppercase">DND / SO</span>
+                        <div id="kpiDND" class="text-xl font-black text-amber-700">0</div>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded-xl border border-purple-200 text-center shadow-sm">
+                        <span class="text-[10px] font-bold text-purple-700 uppercase">Maintenance</span>
+                        <div id="kpiOOO" class="text-xl font-black text-purple-700">0</div>
+                    </div>
+                </div>
+
+                <!-- Action Card Export -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h3 class="text-sm font-black uppercase text-slate-800">Cetak & Bagikan Laporan</h3>
+                        <p class="text-xs text-slate-500">Unduh data rekap kamar dan pemakaian linen hari ini.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow transition flex items-center gap-1.5">
+                            📊 Export Excel (.xlsx)
+                        </button>
+                        <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow transition flex items-center gap-1.5">
+                            📄 Unduh PDF
+                        </button>
+                        <button onclick="shareToWhatsApp()" class="bg-green-500 hover:bg-green-600 text-slate-950 text-xs font-extrabold px-4 py-2.5 rounded-lg shadow transition flex items-center gap-1.5">
+                            💬 Kirim ke WhatsApp
+                        </button>
                     </div>
                 </div>
 
             </div>
-        </main>
 
-        <footer class="bg-slate-950 text-slate-400 text-center text-xs p-3 border-t border-slate-800">
-            &copy; Platinum Hotel & Convention Hall • Room Boy Control Sheet Online
+        </div>
+
+        <!-- FOOTER PERSIS GAMBAR -->
+        <footer class="bg-[#0b1329] text-center p-4 border-t border-slate-800">
+            <p class="text-xs font-bold text-amber-400">Platinum Hotel & Convention Hall Balikpapan</p>
+            <p class="text-[11px] text-slate-400">Room Boy Control Sheet & Log - Housekeeping Digital System</p>
         </footer>
+
     </div>
 
-    <!-- JAVASCRIPT KONEKSI SUPABASE & FITUR LENGKAP -->
+    <!-- JAVASCRIPT LOGIC LENGKAP -->
     <script>
-        // KREDENSIAL SUPABASE RESMI
+        // DATA KREDENSIAL SUPABASE
         const SUPABASE_URL = 'https://hupvhnvztvzqbdhuukpt.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_AvLLrrZ0-7F2_AXjC1LQhg_H_bolEmB';
-
-        // Inisialisasi Supabase
         const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let allLogs = [];
+        // DAFTAR ITEM LINEN (PERSIS GAMBAR)
+        const linenItems = [
+            { id: 'duvet_twin', name: 'Duvet Twin', clean: 2, dirty: 2 },
+            { id: 'duvet_king', name: 'Duvet King', clean: 0, dirty: 0 },
+            { id: 'face_towel', name: 'Face Towel', clean: 0, dirty: 0 },
+            { id: 'bath_towel', name: 'Bath Towel', clean: 0, dirty: 0 },
+            { id: 'hand_towel', name: 'Hand Towel', clean: 0, dirty: 0 },
+            { id: 'bath_mat',   name: 'Bath Mat',   clean: 0, dirty: 0 },
+            { id: 'bed_single', name: 'Bed Sheet Single', clean: 0, dirty: 0 },
+            { id: 'bed_double', name: 'Bed Sheet Double', clean: 0, dirty: 0 },
+            { id: 'pillow_case', name: 'Pillow Case', clean: 0, dirty: 0 }
+        ];
 
-        // Inisialisasi Saat Halaman Dimuat
+        // DAFTAR ITEM AMENITIES (PERSIS GAMBAR)
+        const amenitiesItems = [
+            { id: 'dental_kit', name: 'Dental Kit Platinum', count: 2 },
+            { id: 'shampoo',    name: 'Shampoo 30ml', count: 0 },
+            { id: 'bath_gel',   name: 'Bath Gel 30ml', count: 0 },
+            { id: 'body_lotion', name: 'Body Lotion 30ml', count: 0 },
+            { id: 'conditioner', name: 'Hair Conditioner 30ml', count: 0 },
+            { id: 'bar_soap',   name: 'Bar Soap 20g', count: 0 },
+            { id: 'sanitary_bag', name: 'Sanitary Bag', count: 0 },
+            { id: 'shower_cap', name: 'Shower Cap', count: 0 },
+            { id: 'vanity_kit', name: 'Vanity Kit', count: 0 },
+            { id: 'mineral_water', name: 'Mineral Water 330ml', count: 0 },
+            { id: 'slipper',    name: 'Room Slipper Platinum', count: 0 }
+        ];
+
+        let roomLogsData = [];
+        let activeRoomBoy = "toni";
+        let activeShift = "Pagi";
+
+        // INISIALISASI
         window.addEventListener('DOMContentLoaded', () => {
-            // Set tanggal hari ini
-            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
-            // Set jam masuk saat ini
-            document.getElementById('timeIn').value = new Date().toTimeString().slice(0, 5);
+            renderLinenUI();
+            renderAmenitiesUI();
+            updatePreviewSummary();
 
-            fetchLogs();
+            // Set default jam
+            const now = new Date();
+            document.getElementById('formTimeIn').value = now.toTimeString().slice(0, 5);
 
-            // Form Submit
-            document.getElementById('roomLogForm').addEventListener('submit', handleFormSubmit);
+            fetchSupabaseLogs();
+
+            // Form Submit Event
+            document.getElementById('roomForm').addEventListener('submit', handleRoomSubmit);
         });
 
-        // 1. Ambil Data dari Supabase
-        async function fetchLogs() {
-            const tbody = document.getElementById('logTableBody');
-            tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">⏳ Mengambil data terbaru...</td></tr>`;
-
-            try {
-                const { data, error } = await db
-                    .from('room_logs')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                allLogs = data || [];
-                updateStats(allLogs);
-                renderTable(allLogs);
-            } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-red-500 font-bold">Gagal memuat: ${err.message}</td></tr>`;
-            }
+        // 1. RENDER LIST LINEN (DUAL COUNTER: CLEAN & DIRTY)
+        function renderLinenUI() {
+            const container = document.getElementById('linenListContainer');
+            container.innerHTML = linenItems.map((item, idx) => `
+                <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
+                    <span class="text-xs font-semibold text-slate-800">${item.name}</span>
+                    <div class="flex items-center gap-2">
+                        <!-- Clean Counter (Biru) -->
+                        <div class="flex items-center bg-slate-200/70 rounded-lg p-0.5 border border-slate-300">
+                            <button onclick="changeLinenCount(${idx}, 'clean', -1)" class="w-6 h-6 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs">-</button>
+                            <span class="w-7 text-center font-bold text-xs text-slate-800">${item.clean}</span>
+                            <button onclick="changeLinenCount(${idx}, 'clean', 1)" class="w-6 h-6 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-xs">+</button>
+                        </div>
+                        <!-- Dirty Counter (Merah) -->
+                        <div class="flex items-center bg-slate-200/70 rounded-lg p-0.5 border border-slate-300">
+                            <button onclick="changeLinenCount(${idx}, 'dirty', -1)" class="w-6 h-6 flex items-center justify-center bg-red-600 hover:bg-red-700 text-white rounded font-bold text-xs">-</button>
+                            <span class="w-7 text-center font-bold text-xs text-slate-800">${item.dirty}</span>
+                            <button onclick="changeLinenCount(${idx}, 'dirty', 1)" class="w-6 h-6 flex items-center justify-center bg-red-600 hover:bg-red-700 text-white rounded font-bold text-xs">+</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // 2. Simpan Data Baru
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmit');
-            btn.disabled = true;
-            btn.innerText = "⏳ Menyimpan...";
+        // 2. RENDER LIST AMENITIES (SINGLE COUNTER: KUNING/ORANGE)
+        function renderAmenitiesUI() {
+            const container = document.getElementById('amenitiesListContainer');
+            container.innerHTML = amenitiesItems.map((item, idx) => `
+                <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
+                    <span class="text-xs font-semibold text-slate-800">${item.name}</span>
+                    <div class="flex items-center bg-slate-200/70 rounded-lg p-0.5 border border-slate-300">
+                        <button onclick="changeAmenitiesCount(${idx}, -1)" class="w-6 h-6 flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-white rounded font-bold text-xs">-</button>
+                        <span class="w-7 text-center font-bold text-xs text-slate-800">${item.count}</span>
+                        <button onclick="changeAmenitiesCount(${idx}, 1)" class="w-6 h-6 flex items-center justify-center bg-amber-500 hover:bg-amber-600 text-white rounded font-bold text-xs">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-            const linens = [];
-            if (document.getElementById('linenSheet').checked) linens.push('Sheet');
-            if (document.getElementById('linenDuvet').checked) linens.push('Duvet');
-            if (document.getElementById('linenTowel').checked) linens.push('Towel');
-            if (document.getElementById('linenMat').checked) linens.push('Mat');
+        // FUNGSI PERUBAHAN ANGKA
+        window.changeLinenCount = function(idx, type, delta) {
+            linenItems[idx][type] = Math.max(0, linenItems[idx][type] + delta);
+            renderLinenUI();
+            updatePreviewSummary();
+        };
+
+        window.changeAmenitiesCount = function(idx, delta) {
+            amenitiesItems[idx].count = Math.max(0, amenitiesItems[idx].count + delta);
+            renderAmenitiesUI();
+            updatePreviewSummary();
+        };
+
+        // UPDATE RINGKASAN TEKS UNTUK DATABASE
+        function updatePreviewSummary() {
+            const changedLinens = linenItems.filter(l => l.clean > 0 || l.dirty > 0)
+                .map(l => `${l.name} (B:${l.clean}/K:${l.dirty})`);
+            const changedAmen = amenitiesItems.filter(a => a.count > 0)
+                .map(a => `${a.name} (${a.count})`);
+
+            const summary = [...changedLinens, ...changedAmen].join(', ');
+            const previewBox = document.getElementById('previewItems');
+            if (previewBox) {
+                previewBox.innerText = summary || 'Semua barang bernilai 0.';
+            }
+            return summary;
+        }
+
+        // NAVIGASI TAB
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-amber-600', 'border-b-2', 'border-amber-500');
+                btn.classList.add('text-slate-500');
+            });
+
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeNavId = tabId.replace('tab-', 'nav-');
+            const activeNav = document.getElementById(activeNavId);
+            if (activeNav) {
+                activeNav.classList.add('text-amber-600', 'border-b-2', 'border-amber-500');
+                activeNav.classList.remove('text-slate-500');
+            }
+
+            if (tabId === 'tab-step2') {
+                document.getElementById('formTimeOut').value = new Date().toTimeString().slice(0, 5);
+                updatePreviewSummary();
+            }
+        };
+
+        // 3. SUBMIT DATA KE SUPABASE
+        async function handleRoomSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitAll');
+            btn.disabled = true;
+            btn.innerText = "⏳ Menyimpan ke Database...";
+
+            const itemsSummary = updatePreviewSummary();
 
             const payload = {
-                date: document.getElementById('entryDate').value,
-                shift: document.getElementById('entryShift').value,
-                room_number: document.getElementById('roomNumber').value.trim(),
-                floor: document.getElementById('roomFloor').value.trim() || '-',
-                room_type: document.getElementById('roomType').value,
-                status: document.getElementById('roomStatus').value,
-                room_boy: document.getElementById('roomBoyName').value.trim(),
-                time_in: document.getElementById('timeIn').value || '-',
-                time_out: document.getElementById('timeOut').value || '-',
-                linen_change: linens.join(', ') || '-',
-                maintenance: document.getElementById('roomMaintenance').value.trim() || '-',
-                remarks: document.getElementById('roomRemarks').value.trim() || '-',
+                room_number: document.getElementById('formRoomNumber').value.trim(),
+                floor: document.getElementById('formFloor').value.trim() || '-',
+                room_type: document.getElementById('formRoomType').value,
+                status: document.getElementById('formRoomStatus').value,
+                room_boy: activeRoomBoy,
+                shift: activeShift,
+                time_in: document.getElementById('formTimeIn').value || '-',
+                time_out: document.getElementById('formTimeOut').value || '-',
+                maintenance: document.getElementById('formMaintenance').value.trim() || '-',
+                remarks: document.getElementById('formRemarks').value.trim() || '-',
+                linen_change: itemsSummary || '-',
+                date: new Date().toISOString().split('T')[0],
                 created_at: new Date().toISOString()
             };
 
@@ -321,221 +533,192 @@
                 const { error } = await db.from('room_logs').insert([payload]);
                 if (error) throw error;
 
-                // Kosongkan kolom yang sering berubah
-                document.getElementById('roomNumber').value = '';
-                document.getElementById('roomRemarks').value = '';
-                document.getElementById('roomMaintenance').value = '';
-                document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+                alert(`Data Kamar ${payload.room_number} Berhasil Disimpan!`);
+                
+                // Reset form
+                document.getElementById('formRoomNumber').value = '';
+                document.getElementById('formMaintenance').value = '';
+                document.getElementById('formRemarks').value = '';
+                
+                // Reset counter ke 0
+                linenItems.forEach(l => { l.clean = 0; l.dirty = 0; });
+                amenitiesItems.forEach(a => { a.count = 0; });
+                renderLinenUI();
+                renderAmenitiesUI();
 
-                fetchLogs();
+                await fetchSupabaseLogs();
+                switchTab('tab-logs');
             } catch (err) {
-                alert("Gagal menyimpan: " + err.message);
+                alert("Gagal simpan ke Supabase: " + err.message);
             } finally {
                 btn.disabled = false;
-                btn.innerText = "💾 Simpan Log Kamar";
+                btn.innerText = "💾 Selesaikan & Simpan Log Kamar";
             }
         }
 
-        // 3. Tampilkan Tabel
-        function renderTable(logs) {
-            const tbody = document.getElementById('logTableBody');
+        // 4. AMBIL LOG DARI SUPABASE
+        async function fetchSupabaseLogs() {
+            try {
+                const { data, error } = await db.from('room_logs').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+
+                roomLogsData = data || [];
+                document.getElementById('logCountBadge').innerText = roomLogsData.length;
+                renderTableLogs(roomLogsData);
+                updateKPIs(roomLogsData);
+            } catch (err) {
+                console.error("Gagal load logs:", err.message);
+            }
+        }
+
+        // 5. RENDER TABEL LOG
+        function renderTableLogs(logs) {
+            const tbody = document.getElementById('logsTableBody');
             if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">Belum ada data log kamar.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-slate-400">Belum ada catatan log kamar hari ini.</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = logs.map(item => {
-                const dateStr = item.date || (item.created_at ? item.created_at.slice(0, 10) : '-');
-                const badge = getStatusBadge(item.status);
-
-                return `
-                    <tr class="hover:bg-slate-50 border-b border-slate-100 transition">
-                        <td class="p-2.5 font-medium text-slate-600">
-                            <div class="font-bold text-slate-800">${dateStr}</div>
-                            <span class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">${item.shift || 'Pagi'}</span>
-                        </td>
-                        <td class="p-2.5">
-                            <span class="text-sm font-black text-slate-900 block">${item.room_number || '-'}</span>
-                            <span class="text-[10px] text-slate-400">${item.floor || ''} • ${item.room_type || ''}</span>
-                        </td>
-                        <td class="p-2.5">
-                            <span class="px-2.5 py-1 rounded text-[10px] font-black uppercase ${badge}">
-                                ${item.status || '-'}
-                            </span>
-                        </td>
-                        <td class="p-2.5 font-semibold text-slate-700">${item.room_boy || '-'}</td>
-                        <td class="p-2.5 font-mono text-[11px] text-slate-500">${item.time_in || '-'} - ${item.time_out || '-'}</td>
-                        <td class="p-2.5 text-[11px] text-slate-600">${item.linen_change || '-'}</td>
-                        <td class="p-2.5 text-[11px] text-slate-600 max-w-[150px]">
-                            ${item.maintenance && item.maintenance !== '-' ? `<span class="text-rose-600 font-bold block">⚠️ ${item.maintenance}</span>` : ''}
-                            <span>${item.remarks || '-'}</span>
-                        </td>
-                        <td class="p-2.5 text-center action-col">
-                            <div class="flex items-center justify-center gap-1">
-                                <button onclick="quickSetClean('${item.id}')" title="Selesai Bersih (VC)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 p-1.5 rounded text-[10px] font-bold">
-                                    ✅ VC
-                                </button>
-                                <button onclick="deleteLog('${item.id}')" title="Hapus" class="bg-rose-100 hover:bg-rose-200 text-rose-800 p-1.5 rounded text-[10px] font-bold">
-                                    🗑️
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+            tbody.innerHTML = logs.map(item => `
+                <tr class="hover:bg-slate-50 border-b border-slate-100 transition">
+                    <td class="p-3 font-mono text-[11px] text-slate-500">
+                        <span class="font-bold text-slate-800">${item.date || '-'}</span><br>
+                        ${item.time_in || '-'} - ${item.time_out || '-'}
+                    </td>
+                    <td class="p-3">
+                        <span class="text-sm font-black text-slate-900">${item.room_number}</span>
+                        <span class="text-[10px] text-slate-400 block">${item.floor || ''} • ${item.room_type || ''}</span>
+                    </td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black ${getStatusBadge(item.status)}">
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td class="p-3 font-semibold text-slate-700">${item.room_boy}</td>
+                    <td class="p-3 text-[11px] text-slate-600 max-w-[200px] truncate" title="${item.linen_change}">
+                        ${item.linen_change || '-'}
+                    </td>
+                    <td class="p-3 text-[11px] text-slate-600">
+                        ${item.maintenance && item.maintenance !== '-' ? `<span class="text-rose-600 font-bold block">⚠️ ${item.maintenance}</span>` : ''}
+                        <span>${item.remarks || '-'}</span>
+                    </td>
+                    <td class="p-3 text-center">
+                        <div class="flex items-center justify-center gap-1">
+                            <button onclick="quickSetClean('${item.id}')" title="Jadikan VC" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 p-1 rounded font-bold text-[10px]">✅ VC</button>
+                            <button onclick="deleteLogItem('${item.id}')" title="Hapus" class="bg-rose-100 hover:bg-rose-200 text-rose-800 p-1 rounded font-bold text-[10px]">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
         }
 
-        // 4. Update Angka Status Kamar
-        function updateStats(logs) {
-            document.getElementById('statTotal').innerText = logs.length;
-            document.getElementById('statVC').innerText = logs.filter(l => l.status === 'VC').length;
-            document.getElementById('statVD').innerText = logs.filter(l => l.status === 'VD').length;
-            document.getElementById('statOccupied').innerText = logs.filter(l => l.status === 'OC' || l.status === 'OD').length;
-            document.getElementById('statDND').innerText = logs.filter(l => l.status === 'DND' || l.status === 'SO').length;
-            document.getElementById('statOOO').innerText = logs.filter(l => l.status === 'OOO').length;
-        }
-
-        // 5. Filter Pencarian
-        function applyFilters() {
-            const q = document.getElementById('searchRoom').value.toLowerCase();
-            const status = document.getElementById('filterStatus').value;
-
-            const filtered = allLogs.filter(item => {
-                const matchQ = (item.room_number && item.room_number.toLowerCase().includes(q)) ||
-                               (item.room_boy && item.room_boy.toLowerCase().includes(q));
-                const matchStatus = !status || item.status === status;
-                return matchQ && matchStatus;
-            });
-
-            renderTable(filtered);
-        }
-
-        // 6. Badge Warna
         function getStatusBadge(status) {
-            switch (status) {
+            switch(status) {
                 case 'VC': return 'bg-emerald-100 text-emerald-800 border border-emerald-300';
                 case 'VD': return 'bg-rose-100 text-rose-800 border border-rose-300';
                 case 'OC': return 'bg-blue-100 text-blue-800 border border-blue-300';
                 case 'OD': return 'bg-amber-100 text-amber-800 border border-amber-300';
-                case 'DND': return 'bg-orange-100 text-orange-800 border border-orange-300';
                 case 'OOO': return 'bg-purple-100 text-purple-800 border border-purple-300';
                 default: return 'bg-slate-100 text-slate-700';
             }
         }
 
-        // 7. Ubah Status Cepat jadi VC
-        async function quickSetClean(id) {
-            const nowTime = new Date().toTimeString().slice(0, 5);
+        window.quickSetClean = async function(id) {
             try {
-                const { error } = await db.from('room_logs').update({ status: 'VC', time_out: nowTime }).eq('id', id);
-                if (error) throw error;
-                fetchLogs();
-            } catch (err) {
-                alert("Gagal update: " + err.message);
-            }
+                await db.from('room_logs').update({ status: 'VC', time_out: new Date().toTimeString().slice(0, 5) }).eq('id', id);
+                fetchSupabaseLogs();
+            } catch (e) { alert(e.message); }
+        };
+
+        window.deleteLogItem = async function(id) {
+            if (!confirm('Hapus log kamar ini?')) return;
+            try {
+                await db.from('room_logs').delete().eq('id', id);
+                fetchSupabaseLogs();
+            } catch (e) { alert(e.message); }
+        };
+
+        function filterLogs() {
+            const q = document.getElementById('logSearchInput').value.toLowerCase();
+            const s = document.getElementById('logFilterStatus').value;
+            const filtered = roomLogsData.filter(i => {
+                const matchQ = i.room_number?.toLowerCase().includes(q) || i.room_boy?.toLowerCase().includes(q);
+                const matchS = !s || i.status === s;
+                return matchQ && matchS;
+            });
+            renderTableLogs(filtered);
         }
 
-        // 8. Hapus Data Log
-        async function deleteLog(id) {
-            if (!confirm('Yakin ingin menghapus baris data log kamar ini?')) return;
-            try {
-                const { error } = await db.from('room_logs').delete().eq('id', id);
-                if (error) throw error;
-                fetchLogs();
-            } catch (err) {
-                alert("Gagal hapus: " + err.message);
-            }
+        function updateKPIs(logs) {
+            document.getElementById('kpiTotal').innerText = logs.length;
+            document.getElementById('kpiVC').innerText = logs.filter(l => l.status === 'VC').length;
+            document.getElementById('kpiVD').innerText = logs.filter(l => l.status === 'VD').length;
+            document.getElementById('kpiOccupied').innerText = logs.filter(l => l.status === 'OC' || l.status === 'OD').length;
+            document.getElementById('kpiDND').innerText = logs.filter(l => l.status === 'DND' || l.status === 'SO').length;
+            document.getElementById('kpiOOO').innerText = logs.filter(l => l.status === 'OOO').length;
         }
 
-        // 9. EXPORT KE EXCEL
-        function exportToExcel() {
-            if (allLogs.length === 0) {
-                alert("Tidak ada data untuk diekspor!");
-                return;
+        // GANTI PROFIL USER & SHIFT (TANPA PASSWORD)
+        window.promptUserChange = function() {
+            const name = prompt("Masukkan Nama Room Boy:", activeRoomBoy);
+            if (name) {
+                activeRoomBoy = name.toLowerCase();
+                document.getElementById('currentUserName').innerText = activeRoomBoy;
             }
+            const shift = prompt("Masukkan Shift (Pagi / Siang / Malam):", activeShift);
+            if (shift) {
+                activeShift = shift;
+                document.getElementById('currentShiftDisplay').innerText = activeShift;
+            }
+        };
 
-            const excelRows = allLogs.map((item, idx) => ({
+        // EXPORT TO EXCEL
+        window.exportToExcel = function() {
+            if (roomLogsData.length === 0) return alert("Belum ada data untuk diexport!");
+            const rows = roomLogsData.map((item, idx) => ({
                 "No": idx + 1,
-                "Tanggal": item.date || item.created_at?.slice(0, 10) || '',
+                "Tanggal": item.date,
                 "Shift": item.shift || 'Pagi',
-                "Lantai": item.floor || '',
-                "No Kamar": item.room_number || '',
-                "Tipe Kamar": item.room_type || '',
-                "Status": item.status || '',
-                "Room Boy": item.room_boy || '',
-                "Jam Masuk": item.time_in || '',
-                "Jam Keluar": item.time_out || '',
-                "Ganti Linen": item.linen_change || '',
-                "Kerusakan (Maintenance)": item.maintenance || '',
-                "Catatan (Remarks)": item.remarks || ''
+                "Lantai": item.floor,
+                "Kamar": item.room_number,
+                "Tipe": item.room_type,
+                "Status": item.status,
+                "Room Boy": item.room_boy,
+                "Jam": `${item.time_in} - ${item.time_out}`,
+                "Linen & Supplies": item.linen_change,
+                "Kerusakan": item.maintenance,
+                "Remarks": item.remarks
             }));
-
-            const ws = XLSX.utils.json_to_sheet(excelRows);
+            const ws = XLSX.utils.json_to_sheet(rows);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Control_Sheet");
+            XLSX.writeFile(wb, `Room_Boy_Control_Sheet_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        };
 
-            const today = new Date().toISOString().slice(0, 10);
-            XLSX.writeFile(wb, `Room_Boy_Control_Sheet_PHB_${today}.xlsx`);
-        }
-
-        // 10. EXPORT KE PDF
-        function exportToPDF() {
-            const area = document.getElementById('printArea');
-            const pdfHeader = document.getElementById('pdfHeader');
-            document.getElementById('pdfDate').innerText = `Laporan Tanggal: ${new Date().toLocaleDateString('id-ID', { dateStyle: 'full' })}`;
-
-            pdfHeader.classList.remove('hidden');
-            document.querySelectorAll('.action-col').forEach(el => el.style.display = 'none');
-
+        // EXPORT TO PDF
+        window.exportToPDF = function() {
+            const tableEl = document.getElementById('tab-logs');
+            switchTab('tab-logs');
             const opt = {
-                margin:       [0.3, 0.3, 0.3, 0.3],
-                filename:     `Room_Boy_Control_Sheet_${new Date().toISOString().slice(0,10)}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+                margin: 0.3,
+                filename: `Room_Boy_Control_Sheet_${new Date().toISOString().slice(0, 10)}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
             };
+            html2pdf().set(opt).from(tableEl).save();
+        };
 
-            html2pdf().set(opt).from(area).save().then(() => {
-                pdfHeader.classList.add('hidden');
-                document.querySelectorAll('.action-col').forEach(el => el.style.display = '');
-            });
-        }
-
-        // 11. KIRIM RINGKASAN KE WHATSAPP
-        function shareToWhatsApp() {
-            if (allLogs.length === 0) {
-                alert("Belum ada data untuk dikirim!");
-                return;
-            }
-
+        // SHARE TO WHATSAPP
+        window.shareToWhatsApp = function() {
+            if (roomLogsData.length === 0) return alert("Belum ada data!");
             const today = new Date().toLocaleDateString('id-ID', { dateStyle: 'full' });
-            const total = allLogs.length;
-            const vc = allLogs.filter(l => l.status === 'VC').length;
-            const vd = allLogs.filter(l => l.status === 'VD').length;
-            const occ = allLogs.filter(l => l.status === 'OC' || l.status === 'OD').length;
-            const ooo = allLogs.filter(l => l.status === 'OOO').length;
-
-            const maint = allLogs
-                .filter(l => l.maintenance && l.maintenance !== '-')
-                .map(l => `• Kamar ${l.room_number}: ${l.maintenance}`)
-                .join('%0A');
-
-            const text = 
-`*LAPORAN HOUSEKEEPING - ROOM BOY CONTROL SHEET*%0A` +
-`*Platinum Hotel & Convention Hall*%0A` +
-`----------------------------------------%0A` +
-`📅 Tanggal: ${encodeURIComponent(today)}%0A` +
-`🏨 Total Kamar Terdata: *${total}*%0A` +
-`✅ Vacant Clean (VC): *${vc}*%0A` +
-`🧹 Vacant Dirty (VD): *${vd}*%0A` +
-`🛌 Occupied (OC/OD): *${occ}*%0A` +
-`⚠️ Maintenance/OOO: *${ooo}*%0A` +
-`----------------------------------------%0A` +
-(maint ? `*Laporan Kerusakan:*%0A${maint}%0A----------------------------------------%0A` : '') +
-`_Laporan dikirim otomatis via Housekeeping Digital System_`;
-
+            const total = roomLogsData.length;
+            const vc = roomLogsData.filter(l => l.status === 'VC').length;
+            const vd = roomLogsData.filter(l => l.status === 'VD').length;
+            const text = `*LAPORAN HOUSEKEEPING - PLATINUM HOTEL BALIKPAPAN*%0A📅 Tanggal: ${encodeURIComponent(today)}%0A🏨 Total: *${total}* | VC: *${vc}* | VD: *${vd}*%0A_Dikirim via Housekeeping Digital System_`;
             window.open(`https://wa.me/?text=${text}`, '_blank');
-        }
+        };
     </script>
 </body>
 </html>
