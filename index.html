@@ -3,104 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Room Boy Control Sheet & Log - Platinum Hotel</title>
+    <title>Room Boy Control Sheet & Housekeeping Log - Platinum Hotel</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS (Excel Export) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- html2pdf.js (PDF Export) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-slate-900 text-slate-800 font-sans min-h-screen p-2 md:p-6">
 
-    <!-- Container Utama Aplikasi -->
-    <div id="mainApp" class="max-w-6xl mx-auto bg-slate-50 min-h-screen rounded-2xl shadow-2xl overflow-hidden flex flex-col justify-between">
+    <!-- Container Utama -->
+    <div id="mainApp" class="max-w-7xl mx-auto bg-slate-50 min-h-screen rounded-2xl shadow-2xl overflow-hidden flex flex-col justify-between">
         
-        <!-- Header -->
-        <header class="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-amber-500/30">
-            <div>
-                <h1 class="text-sm md:text-lg font-bold font-serif uppercase tracking-wide">Platinum Hotel & Convention Hall</h1>
-                <p class="text-xs text-amber-400 font-semibold">Housekeeping Digital Log System</p>
-            </div>
+        <!-- Header Hotel -->
+        <header class="bg-slate-950 text-white p-4 md:p-6 border-b-2 border-amber-500 flex flex-wrap justify-between items-center gap-4">
             <div class="flex items-center gap-3">
-                <span id="userInfo" class="text-xs font-bold text-amber-300">👤 Staff Housekeeping</span>
+                <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-2xl font-serif text-amber-400 font-black">
+                    P
+                </div>
+                <div>
+                    <h1 class="text-base md:text-xl font-bold font-serif uppercase tracking-widest text-amber-400">
+                        Platinum Hotel & Convention Hall
+                    </h1>
+                    <p class="text-xs text-slate-300 font-medium">Housekeeping Department • Room Boy Control Sheet Cloud</p>
+                </div>
+            </div>
+
+            <!-- Tombol Aksi Cepat Export & Kirim -->
+            <div class="flex flex-wrap items-center gap-2">
+                <button id="btnExportExcel" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
+                    📊 Export Excel (.xlsx)
+                </button>
+                <button id="btnExportPDF" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
+                    📄 Unduh PDF
+                </button>
+                <button id="btnShareWA" class="bg-green-500 hover:bg-green-600 text-slate-950 text-xs font-extrabold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
+                    💬 Kirim Ringkasan ke WA
+                </button>
             </div>
         </header>
 
-        <!-- Main Content -->
+        <!-- KPI / Status Counter Cards -->
+        <section class="bg-slate-900/90 text-white p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 border-b border-slate-800">
+            <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 text-center">
+                <span class="text-[11px] text-slate-400 font-semibold block uppercase">Total Kamar</span>
+                <span id="statTotal" class="text-xl font-black text-amber-400">0</span>
+            </div>
+            <div class="bg-emerald-950/40 p-3 rounded-xl border border-emerald-500/30 text-center">
+                <span class="text-[11px] text-emerald-300 font-semibold block uppercase">Clean (VC)</span>
+                <span id="statVC" class="text-xl font-black text-emerald-400">0</span>
+            </div>
+            <div class="bg-rose-950/40 p-3 rounded-xl border border-rose-500/30 text-center">
+                <span class="text-[11px] text-rose-300 font-semibold block uppercase">Dirty (VD)</span>
+                <span id="statVD" class="text-xl font-black text-rose-400">0</span>
+            </div>
+            <div class="bg-blue-950/40 p-3 rounded-xl border border-blue-500/30 text-center">
+                <span class="text-[11px] text-blue-300 font-semibold block uppercase">Occupied (OC/OD)</span>
+                <span id="statOccupied" class="text-xl font-black text-blue-400">0</span>
+            </div>
+            <div class="bg-amber-950/40 p-3 rounded-xl border border-amber-500/30 text-center">
+                <span class="text-[11px] text-amber-300 font-semibold block uppercase">DND / SO</span>
+                <span id="statDND" class="text-xl font-black text-amber-400">0</span>
+            </div>
+            <div class="bg-purple-950/40 p-3 rounded-xl border border-purple-500/30 text-center">
+                <span class="text-[11px] text-purple-300 font-semibold block uppercase">Maintenance / OOO</span>
+                <span id="statOOO" class="text-xl font-black text-purple-400">0</span>
+            </div>
+        </section>
+
+        <!-- Main Content Area -->
         <main class="p-4 md:p-6 space-y-6 flex-1">
-            
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                <!-- Form Input Log Kamar -->
-                <div class="lg:col-span-1 bg-white p-5 rounded-xl shadow-md border border-slate-200">
-                    <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b pb-2 flex items-center justify-between">
-                        <span>📝 Input Log Kamar</span>
-                        <span class="text-xs font-normal text-slate-500">Form Control</span>
-                    </h2>
-                    
-                    <form id="roomLogForm" class="space-y-4 text-xs md:text-sm">
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Nomor Kamar</label>
-                            <input type="text" id="roomNumber" required placeholder="Contoh: 301" class="w-full p-2.5 bg-slate-50 border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                <!-- KOLOM KIRI: FORM INPUT CONTROL SHEET (4 Cols) -->
+                <div class="lg:col-span-4 bg-white p-5 rounded-2xl shadow border border-slate-200">
+                    <div class="flex items-center justify-between border-b pb-3 mb-4">
+                        <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                            ✍️ Input Room Control
+                        </h2>
+                        <span class="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">New Entry</span>
+                    </div>
+
+                    <form id="roomLogForm" class="space-y-3.5 text-xs">
+                        <!-- Tanggal & Shift -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Tanggal</label>
+                                <input type="date" id="entryDate" required class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-semibold">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Shift Kerja</label>
+                                <select id="entryShift" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-semibold">
+                                    <option value="Pagi">Pagi (Morning)</option>
+                                    <option value="Siang">Siang (Evening)</option>
+                                    <option value="Malam">Malam (Night)</option>
+                                </select>
+                            </div>
                         </div>
 
+                        <!-- No Kamar, Lantai, & Tipe Kamar -->
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">No Kamar</label>
+                                <input type="text" id="roomNumber" required placeholder="301" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-black text-slate-900 outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Lantai</label>
+                                <input type="text" id="roomFloor" placeholder="Lt. 3" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-medium">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Tipe Kamar</label>
+                                <select id="roomType" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-medium">
+                                    <option value="Deluxe">Deluxe</option>
+                                    <option value="Superior">Superior</option>
+                                    <option value="Executive">Executive</option>
+                                    <option value="Junior Suite">Junior Suite</option>
+                                    <option value="Suite">Suite</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Status Kamar -->
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Status Kamar</label>
-                            <select id="roomStatus" required class="w-full p-2.5 bg-slate-50 border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
-                                <option value="VC">VC - Vacant Clean</option>
-                                <option value="VD">VD - Vacant Dirty</option>
-                                <option value="OC">OC - Occupied Clean</option>
-                                <option value="OD">OD - Occupied Dirty</option>
-                                <option value="OO">OO - Out of Order</option>
-                                <option value="ED">ED - Expected Departure</option>
+                            <label class="block font-bold text-slate-700 mb-1">Status Kamar</label>
+                            <select id="roomStatus" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg font-bold outline-none text-slate-800">
+                                <option value="VC">VC - Vacant Clean (Siap Huni)</option>
+                                <option value="VD">VD - Vacant Dirty (Kotor Kosong)</option>
+                                <option value="OD">OD - Occupied Dirty (Kotor Terisi)</option>
+                                <option value="OC">OC - Occupied Clean (Bersih Terisi)</option>
+                                <option value="DND">DND - Do Not Disturb</option>
+                                <option value="SO">SO - Sleep Out</option>
+                                <option value="OOO">OOO - Out of Order (Rusak)</option>
                             </select>
                         </div>
 
-                        <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Nama Room Boy</label>
-                            <input type="text" id="roomBoyName" required placeholder="Nama Petugas" class="w-full p-2.5 bg-slate-50 border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        <!-- Nama Room Boy & Waktu Pengerjaan -->
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-1">
+                                <label class="block font-bold text-slate-700 mb-1">Room Boy</label>
+                                <input type="text" id="roomBoyName" required placeholder="Nama" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-semibold">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Jam Masuk</label>
+                                <input type="time" id="timeIn" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Jam Keluar</label>
+                                <input type="time" id="timeOut" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
+                            </div>
                         </div>
 
+                        <!-- Ganti Linen & Amenities -->
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Catatan / Remarks</label>
-                            <textarea id="roomRemarks" rows="2" placeholder="Catatan tambahan (Opsional)" class="w-full p-2.5 bg-slate-50 border border-slate-300 text-slate-900 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
+                            <label class="block font-bold text-slate-700 mb-1">Penggantian Linen / Towel</label>
+                            <div class="flex flex-wrap gap-2 text-[11px] bg-slate-50 p-2 rounded-lg border border-slate-200">
+                                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenSheet" value="Sheet"> Sheet</label>
+                                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenDuvet" value="Duvet"> Duvet</label>
+                                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenTowel" value="Bath Towel"> Bath Towel</label>
+                                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenMat" value="Bath Mat"> Mat</label>
+                            </div>
                         </div>
 
-                        <button type="submit" id="btnSubmit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-lg shadow uppercase transition-all duration-200">
-                            ➕ Simpan Data Log
+                        <!-- Laporan Kerusakan / Maintenance -->
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Laporan Kerusakan / Engineering (Opsional)</label>
+                            <input type="text" id="roomMaintenance" placeholder="Contoh: Lampu kamar mandi mati, AC kurang dingin" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
+                        </div>
+
+                        <!-- Catatan Khusus / Remarks -->
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Catatan Tambahan (Remarks)</label>
+                            <textarea id="roomRemarks" rows="2" placeholder="Contoh: Extra bed ditambahkan, tamu check out pkl 12:00" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none"></textarea>
+                        </div>
+
+                        <button type="submit" id="btnSubmit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl shadow-lg uppercase tracking-wider transition-all duration-150 flex items-center justify-center gap-2">
+                            <span>💾 Simpan Log Kamar</span>
                         </button>
                     </form>
                 </div>
 
-                <!-- Tabel Data Log -->
-                <div class="lg:col-span-2 bg-white p-5 rounded-xl shadow-md border border-slate-200 flex flex-col justify-between">
+                <!-- KOLOM KANAN: FILTER & TABEL DATA LOG (8 Cols) -->
+                <div class="lg:col-span-8 bg-white p-5 rounded-2xl shadow border border-slate-200 flex flex-col justify-between">
                     <div>
-                        <div class="flex justify-between items-center mb-4 border-b pb-2">
-                            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">
-                                📋 Control Sheet & Log
-                            </h2>
-                            <button id="btnPrint" class="bg-slate-800 hover:bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-all">
-                                🖨️ Cetak / PDF
+                        <!-- Filter Bar -->
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+                            <div class="flex flex-wrap items-center gap-2 flex-1">
+                                <input type="text" id="searchRoom" placeholder="🔍 Cari No Kamar / Room Boy..." class="p-2 border border-slate-300 rounded-lg outline-none w-48 font-medium">
+                                <select id="filterStatus" class="p-2 border border-slate-300 rounded-lg outline-none font-semibold">
+                                    <option value="">Semua Status</option>
+                                    <option value="VC">VC - Clean</option>
+                                    <option value="VD">VD - Dirty</option>
+                                    <option value="OD">OD - Occupied Dirty</option>
+                                    <option value="OC">OC - Occupied Clean</option>
+                                    <option value="DND">DND</option>
+                                    <option value="OOO">OOO</option>
+                                </select>
+                                <select id="filterShift" class="p-2 border border-slate-300 rounded-lg outline-none font-semibold">
+                                    <option value="">Semua Shift</option>
+                                    <option value="Pagi">Pagi</option>
+                                    <option value="Siang">Siang</option>
+                                    <option value="Malam">Malam</option>
+                                </select>
+                            </div>
+                            <button id="btnReload" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2 rounded-lg font-bold flex items-center gap-1 transition">
+                                🔄 Refresh
                             </button>
                         </div>
 
+                        <!-- Area Cetak PDF & Tampilan Tabel -->
                         <div id="printArea" class="overflow-x-auto">
-                            <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                            <!-- Header Cetak Khusus PDF (Hanya Muncul di Dokumen Cetak) -->
+                            <div id="pdfHeader" class="hidden text-center pb-4 mb-4 border-b-2 border-slate-800">
+                                <h2 class="text-xl font-serif font-black uppercase text-slate-900 tracking-wider">Platinum Hotel & Convention Hall</h2>
+                                <h3 class="text-sm font-bold uppercase text-slate-700">Housekeeping Department - Room Boy Daily Control Sheet</h3>
+                                <p id="pdfSubheader" class="text-xs text-slate-500 mt-1"></p>
+                            </div>
+
+                            <table class="w-full text-left text-xs border-collapse">
                                 <thead>
-                                    <tr class="bg-slate-100 text-slate-800 uppercase text-[11px] border-b border-slate-300">
-                                        <th class="p-2.5">Waktu</th>
-                                        <th class="p-2.5">No. Kamar</th>
+                                    <tr class="bg-slate-800 text-white uppercase text-[10px] tracking-wider">
+                                        <th class="p-2.5 rounded-l-lg">Tanggal / Shift</th>
+                                        <th class="p-2.5">Kamar</th>
                                         <th class="p-2.5">Status</th>
                                         <th class="p-2.5">Room Boy</th>
-                                        <th class="p-2.5">Catatan</th>
-                                        <th class="p-2.5 text-center action-col">Aksi</th>
+                                        <th class="p-2.5">In - Out</th>
+                                        <th class="p-2.5">Linen</th>
+                                        <th class="p-2.5">Remarks / Maint</th>
+                                        <th class="p-2.5 text-center rounded-r-lg action-col">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody id="logTableBody" class="divide-y divide-slate-200">
+                                <tbody id="logTableBody" class="divide-y divide-slate-100">
                                     <tr>
-                                        <td colspan="6" class="p-4 text-center text-slate-400">Memuat data log...</td>
+                                        <td colspan="8" class="p-8 text-center text-slate-400">Memuat data log kamar...</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t text-[11px] text-slate-500 flex justify-between items-center">
+                        <span>Menampilkan data log terkini dari Supabase Cloud.</span>
+                        <span class="font-bold text-slate-700">Sistem Tanpa Login • Siap Digunakan</span>
                     </div>
                 </div>
 
@@ -108,11 +253,12 @@
         </main>
 
         <!-- Footer -->
-        <footer class="bg-slate-100 border-t border-slate-200 p-3 text-center text-xs text-slate-500">
-            &copy; Platinum Hotel & Convention Hall - Housekeeping Control System
+        <footer class="bg-slate-950 text-slate-400 text-center text-xs p-3 border-t border-slate-800">
+            &copy; Platinum Hotel & Convention Hall • Housekeeping Control Management
         </footer>
     </div>
 
+    <!-- Script App -->
     <script type="module" src="app.js"></script>
 </body>
 </html>
