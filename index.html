@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room Boy Control Sheet & Housekeeping Log - Platinum Hotel</title>
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS (Excel Export) -->
+    <!-- Library Supabase JS (Versi Universal Tanpa Ribet) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- SheetJS (Export Excel .xlsx) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- html2pdf.js (PDF Export) -->
+    <!-- html2pdf.js (Export PDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-slate-900 text-slate-800 font-sans min-h-screen p-2 md:p-6">
 
-    <!-- Container Utama -->
-    <div id="mainApp" class="max-w-7xl mx-auto bg-slate-50 min-h-screen rounded-2xl shadow-2xl overflow-hidden flex flex-col justify-between">
+    <div class="max-w-7xl mx-auto bg-slate-50 min-h-screen rounded-2xl shadow-2xl overflow-hidden flex flex-col justify-between">
         
-        <!-- Header Hotel -->
+        <!-- HEADER HOTEL -->
         <header class="bg-slate-950 text-white p-4 md:p-6 border-b-2 border-amber-500 flex flex-wrap justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-2xl font-serif text-amber-400 font-black">
@@ -27,27 +27,27 @@
                     <h1 class="text-base md:text-xl font-bold font-serif uppercase tracking-widest text-amber-400">
                         Platinum Hotel & Convention Hall
                     </h1>
-                    <p class="text-xs text-slate-300 font-medium">Housekeeping Department • Room Boy Control Sheet Cloud</p>
+                    <p class="text-xs text-slate-300 font-medium">Housekeeping Department • Room Boy Control Sheet (Akses Terbuka)</p>
                 </div>
             </div>
 
-            <!-- Tombol Aksi Cepat Export & Kirim -->
+            <!-- TOMBOL FITUR LENGKAP -->
             <div class="flex flex-wrap items-center gap-2">
-                <button id="btnExportExcel" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
+                <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
                     📊 Export Excel (.xlsx)
                 </button>
-                <button id="btnExportPDF" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
+                <button onclick="exportToPDF()" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
                     📄 Unduh PDF
                 </button>
-                <button id="btnShareWA" class="bg-green-500 hover:bg-green-600 text-slate-950 text-xs font-extrabold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
-                    💬 Kirim Ringkasan ke WA
+                <button onclick="shareToWhatsApp()" class="bg-green-500 hover:bg-green-600 text-slate-950 text-xs font-extrabold px-3.5 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
+                    💬 Kirim ke WA
                 </button>
             </div>
         </header>
 
-        <!-- KPI / Status Counter Cards -->
-        <section class="bg-slate-900/90 text-white p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 border-b border-slate-800">
-            <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 text-center">
+        <!-- KARTU STATUS REAL-TIME (KPI) -->
+        <section class="bg-slate-900 text-white p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 border-b border-slate-800">
+            <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 text-center">
                 <span class="text-[11px] text-slate-400 font-semibold block uppercase">Total Kamar</span>
                 <span id="statTotal" class="text-xl font-black text-amber-400">0</span>
             </div>
@@ -60,7 +60,7 @@
                 <span id="statVD" class="text-xl font-black text-rose-400">0</span>
             </div>
             <div class="bg-blue-950/40 p-3 rounded-xl border border-blue-500/30 text-center">
-                <span class="text-[11px] text-blue-300 font-semibold block uppercase">Occupied (OC/OD)</span>
+                <span class="text-[11px] text-blue-300 font-semibold block uppercase">Occupied</span>
                 <span id="statOccupied" class="text-xl font-black text-blue-400">0</span>
             </div>
             <div class="bg-amber-950/40 p-3 rounded-xl border border-amber-500/30 text-center">
@@ -68,64 +68,60 @@
                 <span id="statDND" class="text-xl font-black text-amber-400">0</span>
             </div>
             <div class="bg-purple-950/40 p-3 rounded-xl border border-purple-500/30 text-center">
-                <span class="text-[11px] text-purple-300 font-semibold block uppercase">Maintenance / OOO</span>
+                <span class="text-[11px] text-purple-300 font-semibold block uppercase">Maintenance</span>
                 <span id="statOOO" class="text-xl font-black text-purple-400">0</span>
             </div>
         </section>
 
-        <!-- Main Content Area -->
+        <!-- KONTEN UTAMA -->
         <main class="p-4 md:p-6 space-y-6 flex-1">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                <!-- KOLOM KIRI: FORM INPUT CONTROL SHEET (4 Cols) -->
+                <!-- FORM INPUT DATA (KIRI) -->
                 <div class="lg:col-span-4 bg-white p-5 rounded-2xl shadow border border-slate-200">
                     <div class="flex items-center justify-between border-b pb-3 mb-4">
-                        <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                        <h2 class="text-sm font-black text-slate-800 uppercase tracking-wide">
                             ✍️ Input Room Control
                         </h2>
-                        <span class="text-[11px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">New Entry</span>
+                        <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Bebas Login</span>
                     </div>
 
-                    <form id="roomLogForm" class="space-y-3.5 text-xs">
-                        <!-- Tanggal & Shift -->
+                    <form id="roomLogForm" class="space-y-3 text-xs">
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">Tanggal</label>
                                 <input type="date" id="entryDate" required class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-semibold">
                             </div>
                             <div>
-                                <label class="block font-bold text-slate-700 mb-1">Shift Kerja</label>
+                                <label class="block font-bold text-slate-700 mb-1">Shift</label>
                                 <select id="entryShift" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-semibold">
-                                    <option value="Pagi">Pagi (Morning)</option>
-                                    <option value="Siang">Siang (Evening)</option>
-                                    <option value="Malam">Malam (Night)</option>
+                                    <option value="Pagi">Pagi</option>
+                                    <option value="Siang">Siang</option>
+                                    <option value="Malam">Malam</option>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- No Kamar, Lantai, & Tipe Kamar -->
                         <div class="grid grid-cols-3 gap-2">
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">No Kamar</label>
-                                <input type="text" id="roomNumber" required placeholder="301" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-black text-slate-900 outline-none">
+                                <input type="text" id="roomNumber" required placeholder="Contoh: 301" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-black text-slate-900 outline-none">
                             </div>
                             <div>
                                 <label class="block font-bold text-slate-700 mb-1">Lantai</label>
-                                <input type="text" id="roomFloor" placeholder="Lt. 3" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-medium">
+                                <input type="text" id="roomFloor" placeholder="Lt 3" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
                             </div>
                             <div>
-                                <label class="block font-bold text-slate-700 mb-1">Tipe Kamar</label>
-                                <select id="roomType" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-medium">
-                                    <option value="Deluxe">Deluxe</option>
+                                <label class="block font-bold text-slate-700 mb-1">Tipe</label>
+                                <select id="roomType" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
                                     <option value="Superior">Superior</option>
+                                    <option value="Deluxe">Deluxe</option>
                                     <option value="Executive">Executive</option>
-                                    <option value="Junior Suite">Junior Suite</option>
                                     <option value="Suite">Suite</option>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- Status Kamar -->
                         <div>
                             <label class="block font-bold text-slate-700 mb-1">Status Kamar</label>
                             <select id="roomStatus" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg font-bold outline-none text-slate-800">
@@ -139,59 +135,55 @@
                             </select>
                         </div>
 
-                        <!-- Nama Room Boy & Waktu Pengerjaan -->
                         <div class="grid grid-cols-3 gap-2">
-                            <div class="col-span-1">
+                            <div>
                                 <label class="block font-bold text-slate-700 mb-1">Room Boy</label>
                                 <input type="text" id="roomBoyName" required placeholder="Nama" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none font-semibold">
                             </div>
                             <div>
-                                <label class="block font-bold text-slate-700 mb-1">Jam Masuk</label>
+                                <label class="block font-bold text-slate-700 mb-1">In</label>
                                 <input type="time" id="timeIn" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
                             </div>
                             <div>
-                                <label class="block font-bold text-slate-700 mb-1">Jam Keluar</label>
+                                <label class="block font-bold text-slate-700 mb-1">Out</label>
                                 <input type="time" id="timeOut" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
                             </div>
                         </div>
 
-                        <!-- Ganti Linen & Amenities -->
                         <div>
-                            <label class="block font-bold text-slate-700 mb-1">Penggantian Linen / Towel</label>
+                            <label class="block font-bold text-slate-700 mb-1">Ganti Linen / Towel</label>
                             <div class="flex flex-wrap gap-2 text-[11px] bg-slate-50 p-2 rounded-lg border border-slate-200">
                                 <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenSheet" value="Sheet"> Sheet</label>
                                 <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenDuvet" value="Duvet"> Duvet</label>
-                                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenTowel" value="Bath Towel"> Bath Towel</label>
-                                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenMat" value="Bath Mat"> Mat</label>
+                                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenTowel" value="Towel"> Towel</label>
+                                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="linenMat" value="Mat"> Mat</label>
                             </div>
                         </div>
 
-                        <!-- Laporan Kerusakan / Maintenance -->
                         <div>
-                            <label class="block font-bold text-slate-700 mb-1">Laporan Kerusakan / Engineering (Opsional)</label>
-                            <input type="text" id="roomMaintenance" placeholder="Contoh: Lampu kamar mandi mati, AC kurang dingin" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
+                            <label class="block font-bold text-slate-700 mb-1">Kerusakan / Engineering</label>
+                            <input type="text" id="roomMaintenance" placeholder="Contoh: AC kurang dingin, kran bocor" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none">
                         </div>
 
-                        <!-- Catatan Khusus / Remarks -->
                         <div>
                             <label class="block font-bold text-slate-700 mb-1">Catatan Tambahan (Remarks)</label>
-                            <textarea id="roomRemarks" rows="2" placeholder="Contoh: Extra bed ditambahkan, tamu check out pkl 12:00" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none"></textarea>
+                            <textarea id="roomRemarks" rows="2" placeholder="Catatan opsional..." class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg outline-none"></textarea>
                         </div>
 
-                        <button type="submit" id="btnSubmit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl shadow-lg uppercase tracking-wider transition-all duration-150 flex items-center justify-center gap-2">
-                            <span>💾 Simpan Log Kamar</span>
+                        <button type="submit" id="btnSubmit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-3 rounded-xl shadow-lg uppercase tracking-wider transition">
+                            💾 Simpan Log Kamar
                         </button>
                     </form>
                 </div>
 
-                <!-- KOLOM KANAN: FILTER & TABEL DATA LOG (8 Cols) -->
+                <!-- TABEL DATA (KANAN) -->
                 <div class="lg:col-span-8 bg-white p-5 rounded-2xl shadow border border-slate-200 flex flex-col justify-between">
                     <div>
-                        <!-- Filter Bar -->
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+                        <!-- Filter Pencarian -->
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4 flex flex-wrap items-center justify-between gap-2 text-xs">
                             <div class="flex flex-wrap items-center gap-2 flex-1">
-                                <input type="text" id="searchRoom" placeholder="🔍 Cari No Kamar / Room Boy..." class="p-2 border border-slate-300 rounded-lg outline-none w-48 font-medium">
-                                <select id="filterStatus" class="p-2 border border-slate-300 rounded-lg outline-none font-semibold">
+                                <input type="text" id="searchRoom" oninput="applyFilters()" placeholder="🔍 Cari Kamar / Petugas..." class="p-2 border border-slate-300 rounded-lg outline-none w-44">
+                                <select id="filterStatus" onchange="applyFilters()" class="p-2 border border-slate-300 rounded-lg outline-none font-semibold">
                                     <option value="">Semua Status</option>
                                     <option value="VC">VC - Clean</option>
                                     <option value="VD">VD - Dirty</option>
@@ -200,25 +192,19 @@
                                     <option value="DND">DND</option>
                                     <option value="OOO">OOO</option>
                                 </select>
-                                <select id="filterShift" class="p-2 border border-slate-300 rounded-lg outline-none font-semibold">
-                                    <option value="">Semua Shift</option>
-                                    <option value="Pagi">Pagi</option>
-                                    <option value="Siang">Siang</option>
-                                    <option value="Malam">Malam</option>
-                                </select>
                             </div>
-                            <button id="btnReload" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-2 rounded-lg font-bold flex items-center gap-1 transition">
-                                🔄 Refresh
+                            <button onclick="fetchLogs()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-3 py-2 rounded-lg font-bold transition">
+                                🔄 Segarkan
                             </button>
                         </div>
 
-                        <!-- Area Cetak PDF & Tampilan Tabel -->
+                        <!-- Area Tabel & Cetak PDF -->
                         <div id="printArea" class="overflow-x-auto">
-                            <!-- Header Cetak Khusus PDF (Hanya Muncul di Dokumen Cetak) -->
+                            <!-- Header Khusus saat PDF dicetak -->
                             <div id="pdfHeader" class="hidden text-center pb-4 mb-4 border-b-2 border-slate-800">
-                                <h2 class="text-xl font-serif font-black uppercase text-slate-900 tracking-wider">Platinum Hotel & Convention Hall</h2>
-                                <h3 class="text-sm font-bold uppercase text-slate-700">Housekeeping Department - Room Boy Daily Control Sheet</h3>
-                                <p id="pdfSubheader" class="text-xs text-slate-500 mt-1"></p>
+                                <h2 class="text-xl font-serif font-black uppercase text-slate-900">Platinum Hotel & Convention Hall</h2>
+                                <h3 class="text-sm font-bold uppercase text-slate-700">Room Boy Daily Control Sheet</h3>
+                                <p id="pdfDate" class="text-xs text-slate-500 mt-1"></p>
                             </div>
 
                             <table class="w-full text-left text-xs border-collapse">
@@ -230,7 +216,7 @@
                                         <th class="p-2.5">Room Boy</th>
                                         <th class="p-2.5">In - Out</th>
                                         <th class="p-2.5">Linen</th>
-                                        <th class="p-2.5">Remarks / Maint</th>
+                                        <th class="p-2.5">Kerusakan / Remarks</th>
                                         <th class="p-2.5 text-center rounded-r-lg action-col">Aksi</th>
                                     </tr>
                                 </thead>
@@ -244,21 +230,312 @@
                     </div>
 
                     <div class="mt-4 pt-3 border-t text-[11px] text-slate-500 flex justify-between items-center">
-                        <span>Menampilkan data log terkini dari Supabase Cloud.</span>
-                        <span class="font-bold text-slate-700">Sistem Tanpa Login • Siap Digunakan</span>
+                        <span>Status: Cloud Terhubung ke Supabase</span>
+                        <span class="font-bold text-slate-700">Platinum Hotel Housekeeping</span>
                     </div>
                 </div>
 
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="bg-slate-950 text-slate-400 text-center text-xs p-3 border-t border-slate-800">
-            &copy; Platinum Hotel & Convention Hall • Housekeeping Control Management
+            &copy; Platinum Hotel & Convention Hall • Room Boy Control Sheet Online
         </footer>
     </div>
 
-    <!-- Script App -->
-    <script type="module" src="app.js"></script>
+    <!-- JAVASCRIPT KONEKSI SUPABASE & FITUR LENGKAP -->
+    <script>
+        // KREDENSIAL SUPABASE RESMI
+        const SUPABASE_URL = 'https://hupvhnvztvzqbdhuukpt.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_AvLLrrZ0-7F2_AXjC1LQhg_H_bolEmB';
+
+        // Inisialisasi Supabase
+        const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let allLogs = [];
+
+        // Inisialisasi Saat Halaman Dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            // Set tanggal hari ini
+            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+            // Set jam masuk saat ini
+            document.getElementById('timeIn').value = new Date().toTimeString().slice(0, 5);
+
+            fetchLogs();
+
+            // Form Submit
+            document.getElementById('roomLogForm').addEventListener('submit', handleFormSubmit);
+        });
+
+        // 1. Ambil Data dari Supabase
+        async function fetchLogs() {
+            const tbody = document.getElementById('logTableBody');
+            tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">⏳ Mengambil data terbaru...</td></tr>`;
+
+            try {
+                const { data, error } = await db
+                    .from('room_logs')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                allLogs = data || [];
+                updateStats(allLogs);
+                renderTable(allLogs);
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-red-500 font-bold">Gagal memuat: ${err.message}</td></tr>`;
+            }
+        }
+
+        // 2. Simpan Data Baru
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerText = "⏳ Menyimpan...";
+
+            const linens = [];
+            if (document.getElementById('linenSheet').checked) linens.push('Sheet');
+            if (document.getElementById('linenDuvet').checked) linens.push('Duvet');
+            if (document.getElementById('linenTowel').checked) linens.push('Towel');
+            if (document.getElementById('linenMat').checked) linens.push('Mat');
+
+            const payload = {
+                date: document.getElementById('entryDate').value,
+                shift: document.getElementById('entryShift').value,
+                room_number: document.getElementById('roomNumber').value.trim(),
+                floor: document.getElementById('roomFloor').value.trim() || '-',
+                room_type: document.getElementById('roomType').value,
+                status: document.getElementById('roomStatus').value,
+                room_boy: document.getElementById('roomBoyName').value.trim(),
+                time_in: document.getElementById('timeIn').value || '-',
+                time_out: document.getElementById('timeOut').value || '-',
+                linen_change: linens.join(', ') || '-',
+                maintenance: document.getElementById('roomMaintenance').value.trim() || '-',
+                remarks: document.getElementById('roomRemarks').value.trim() || '-',
+                created_at: new Date().toISOString()
+            };
+
+            try {
+                const { error } = await db.from('room_logs').insert([payload]);
+                if (error) throw error;
+
+                // Kosongkan kolom yang sering berubah
+                document.getElementById('roomNumber').value = '';
+                document.getElementById('roomRemarks').value = '';
+                document.getElementById('roomMaintenance').value = '';
+                document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+
+                fetchLogs();
+            } catch (err) {
+                alert("Gagal menyimpan: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "💾 Simpan Log Kamar";
+            }
+        }
+
+        // 3. Tampilkan Tabel
+        function renderTable(logs) {
+            const tbody = document.getElementById('logTableBody');
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-slate-400">Belum ada data log kamar.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = logs.map(item => {
+                const dateStr = item.date || (item.created_at ? item.created_at.slice(0, 10) : '-');
+                const badge = getStatusBadge(item.status);
+
+                return `
+                    <tr class="hover:bg-slate-50 border-b border-slate-100 transition">
+                        <td class="p-2.5 font-medium text-slate-600">
+                            <div class="font-bold text-slate-800">${dateStr}</div>
+                            <span class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-bold">${item.shift || 'Pagi'}</span>
+                        </td>
+                        <td class="p-2.5">
+                            <span class="text-sm font-black text-slate-900 block">${item.room_number || '-'}</span>
+                            <span class="text-[10px] text-slate-400">${item.floor || ''} • ${item.room_type || ''}</span>
+                        </td>
+                        <td class="p-2.5">
+                            <span class="px-2.5 py-1 rounded text-[10px] font-black uppercase ${badge}">
+                                ${item.status || '-'}
+                            </span>
+                        </td>
+                        <td class="p-2.5 font-semibold text-slate-700">${item.room_boy || '-'}</td>
+                        <td class="p-2.5 font-mono text-[11px] text-slate-500">${item.time_in || '-'} - ${item.time_out || '-'}</td>
+                        <td class="p-2.5 text-[11px] text-slate-600">${item.linen_change || '-'}</td>
+                        <td class="p-2.5 text-[11px] text-slate-600 max-w-[150px]">
+                            ${item.maintenance && item.maintenance !== '-' ? `<span class="text-rose-600 font-bold block">⚠️ ${item.maintenance}</span>` : ''}
+                            <span>${item.remarks || '-'}</span>
+                        </td>
+                        <td class="p-2.5 text-center action-col">
+                            <div class="flex items-center justify-center gap-1">
+                                <button onclick="quickSetClean('${item.id}')" title="Selesai Bersih (VC)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 p-1.5 rounded text-[10px] font-bold">
+                                    ✅ VC
+                                </button>
+                                <button onclick="deleteLog('${item.id}')" title="Hapus" class="bg-rose-100 hover:bg-rose-200 text-rose-800 p-1.5 rounded text-[10px] font-bold">
+                                    🗑️
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 4. Update Angka Status Kamar
+        function updateStats(logs) {
+            document.getElementById('statTotal').innerText = logs.length;
+            document.getElementById('statVC').innerText = logs.filter(l => l.status === 'VC').length;
+            document.getElementById('statVD').innerText = logs.filter(l => l.status === 'VD').length;
+            document.getElementById('statOccupied').innerText = logs.filter(l => l.status === 'OC' || l.status === 'OD').length;
+            document.getElementById('statDND').innerText = logs.filter(l => l.status === 'DND' || l.status === 'SO').length;
+            document.getElementById('statOOO').innerText = logs.filter(l => l.status === 'OOO').length;
+        }
+
+        // 5. Filter Pencarian
+        function applyFilters() {
+            const q = document.getElementById('searchRoom').value.toLowerCase();
+            const status = document.getElementById('filterStatus').value;
+
+            const filtered = allLogs.filter(item => {
+                const matchQ = (item.room_number && item.room_number.toLowerCase().includes(q)) ||
+                               (item.room_boy && item.room_boy.toLowerCase().includes(q));
+                const matchStatus = !status || item.status === status;
+                return matchQ && matchStatus;
+            });
+
+            renderTable(filtered);
+        }
+
+        // 6. Badge Warna
+        function getStatusBadge(status) {
+            switch (status) {
+                case 'VC': return 'bg-emerald-100 text-emerald-800 border border-emerald-300';
+                case 'VD': return 'bg-rose-100 text-rose-800 border border-rose-300';
+                case 'OC': return 'bg-blue-100 text-blue-800 border border-blue-300';
+                case 'OD': return 'bg-amber-100 text-amber-800 border border-amber-300';
+                case 'DND': return 'bg-orange-100 text-orange-800 border border-orange-300';
+                case 'OOO': return 'bg-purple-100 text-purple-800 border border-purple-300';
+                default: return 'bg-slate-100 text-slate-700';
+            }
+        }
+
+        // 7. Ubah Status Cepat jadi VC
+        async function quickSetClean(id) {
+            const nowTime = new Date().toTimeString().slice(0, 5);
+            try {
+                const { error } = await db.from('room_logs').update({ status: 'VC', time_out: nowTime }).eq('id', id);
+                if (error) throw error;
+                fetchLogs();
+            } catch (err) {
+                alert("Gagal update: " + err.message);
+            }
+        }
+
+        // 8. Hapus Data Log
+        async function deleteLog(id) {
+            if (!confirm('Yakin ingin menghapus baris data log kamar ini?')) return;
+            try {
+                const { error } = await db.from('room_logs').delete().eq('id', id);
+                if (error) throw error;
+                fetchLogs();
+            } catch (err) {
+                alert("Gagal hapus: " + err.message);
+            }
+        }
+
+        // 9. EXPORT KE EXCEL
+        function exportToExcel() {
+            if (allLogs.length === 0) {
+                alert("Tidak ada data untuk diekspor!");
+                return;
+            }
+
+            const excelRows = allLogs.map((item, idx) => ({
+                "No": idx + 1,
+                "Tanggal": item.date || item.created_at?.slice(0, 10) || '',
+                "Shift": item.shift || 'Pagi',
+                "Lantai": item.floor || '',
+                "No Kamar": item.room_number || '',
+                "Tipe Kamar": item.room_type || '',
+                "Status": item.status || '',
+                "Room Boy": item.room_boy || '',
+                "Jam Masuk": item.time_in || '',
+                "Jam Keluar": item.time_out || '',
+                "Ganti Linen": item.linen_change || '',
+                "Kerusakan (Maintenance)": item.maintenance || '',
+                "Catatan (Remarks)": item.remarks || ''
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(excelRows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Control_Sheet");
+
+            const today = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(wb, `Room_Boy_Control_Sheet_PHB_${today}.xlsx`);
+        }
+
+        // 10. EXPORT KE PDF
+        function exportToPDF() {
+            const area = document.getElementById('printArea');
+            const pdfHeader = document.getElementById('pdfHeader');
+            document.getElementById('pdfDate').innerText = `Laporan Tanggal: ${new Date().toLocaleDateString('id-ID', { dateStyle: 'full' })}`;
+
+            pdfHeader.classList.remove('hidden');
+            document.querySelectorAll('.action-col').forEach(el => el.style.display = 'none');
+
+            const opt = {
+                margin:       [0.3, 0.3, 0.3, 0.3],
+                filename:     `Room_Boy_Control_Sheet_${new Date().toISOString().slice(0,10)}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+            };
+
+            html2pdf().set(opt).from(area).save().then(() => {
+                pdfHeader.classList.add('hidden');
+                document.querySelectorAll('.action-col').forEach(el => el.style.display = '');
+            });
+        }
+
+        // 11. KIRIM RINGKASAN KE WHATSAPP
+        function shareToWhatsApp() {
+            if (allLogs.length === 0) {
+                alert("Belum ada data untuk dikirim!");
+                return;
+            }
+
+            const today = new Date().toLocaleDateString('id-ID', { dateStyle: 'full' });
+            const total = allLogs.length;
+            const vc = allLogs.filter(l => l.status === 'VC').length;
+            const vd = allLogs.filter(l => l.status === 'VD').length;
+            const occ = allLogs.filter(l => l.status === 'OC' || l.status === 'OD').length;
+            const ooo = allLogs.filter(l => l.status === 'OOO').length;
+
+            const maint = allLogs
+                .filter(l => l.maintenance && l.maintenance !== '-')
+                .map(l => `• Kamar ${l.room_number}: ${l.maintenance}`)
+                .join('%0A');
+
+            const text = 
+`*LAPORAN HOUSEKEEPING - ROOM BOY CONTROL SHEET*%0A` +
+`*Platinum Hotel & Convention Hall*%0A` +
+`----------------------------------------%0A` +
+`📅 Tanggal: ${encodeURIComponent(today)}%0A` +
+`🏨 Total Kamar Terdata: *${total}*%0A` +
+`✅ Vacant Clean (VC): *${vc}*%0A` +
+`🧹 Vacant Dirty (VD): *${vd}*%0A` +
+`🛌 Occupied (OC/OD): *${occ}*%0A` +
+`⚠️ Maintenance/OOO: *${ooo}*%0A` +
+`----------------------------------------%0A` +
+(maint ? `*Laporan Kerusakan:*%0A${maint}%0A----------------------------------------%0A` : '') +
+`_Laporan dikirim otomatis via Housekeeping Digital System_`;
+
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+    </script>
 </body>
 </html>
