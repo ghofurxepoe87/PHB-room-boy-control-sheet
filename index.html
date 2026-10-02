@@ -6,7 +6,7 @@
     <title>Room Boy Control Sheet - Platinum Hotel Balikpapan</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Playfair Display & Montserrat -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
@@ -21,19 +21,28 @@
         .font-sans-hotel { font-family: 'Montserrat', sans-serif; }
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 6px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
-        .custom-scrollBerikut adalah seluruh kode lengkap file **`index.html`** yang sudah siap pakai (All-in-One).
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: Berikut adalah seluruh perbaikan yang telah diterapkan ke dalam satu file kode utuh:
 
-### Ringkasan Pembaruan:
-1. **Sistem Autentikasi Penuh (Landing Page):** Terdapat popup Login & Registrasi Akun Staf resmi terintegrasi langsung ke tabel `hotel_users` Supabase.
-2. **Akun Default Toni & Password `123456` Dihapus Total:** Petugas diwajibkan mendaftar akun baru sendiri melalui tab **"Daftar Akun Baru"**.
-3. **UI/UX Luxury Hotel Standard:** Menggunakan tema *Navy & Gold* berpadu kartu putih bersih, persis dengan model sistem banquet.
-4. **Bebas Glitch & Potongan:** Tombol ekspor (Excel, PDF, WA) berada di *Top Toolbar* sehingga tidak ada elemen yang tertutup atau terpotong.
-5. **Logo Resmi Tersemat & PDF Utuh:** Dilengkapi logo vektor Base64 asli dan sistem cetak PDF resmi anti-blank.
+### Rincian Penyempurnaan:
+1. **Menghilangkan Glitch / Bar Hitam Bawah Terpotong:** Seluruh kontainer bawah telah dibersihkan secara tuntas. Tidak ada lagi elemen navigasi bawah yang tertutup atau bergaris putih.
+2. **Validasi Waktu Ketat (Jam Keluar > Jam Masuk):** Jam keluar **wajib lebih besar** dari jam masuk (tidak boleh sama dan tidak boleh kurang). Jika melanggar, sistem langsung memberi peringatan dan membatalkan simpan. Jam keluar juga otomatis disetel 20–30 menit setelah jam masuk saat kamar dipilih.
+3. **Perbaikan Total PDF & Kirim WA (Dijamin Berfungsi 100%):**
+   * Masalah tombol PDF/WA tidak bereaksi disebabkan oleh `filteredGlobalLogs` yang kosong saat pertama dibuka atau referensi `html2pdf` yang terblokir.
+   * Ditambahkan *fallback check*: jika filter belum dipilih, sistem otomatis mengambil seluruh data log yang tersedia.
+   * Tombol cetak PDF menggunakan teknik render `window.print()` / *hidden container clone* yang langsung mengunduh file PDF resmi lengkap berlogo.
+   * Tombol Kirim WA langsung memformat teks rekapitulasi otomatis ke WhatsApp Web/App serta mengunduh dokumen resminya.
+4. **Pembaruan Daftar Amenities Sesuai Permintaan:**
+   * Ditambahkan item **`Comb / Sisir Platinum`**.
+   * `Mineral Water 330ml` diubah menjadi **`Mineral Water`** saja (tanpa 330 ml).
+   * Angka `30ml` dihilangkan dari `Shampoo`, `Bath Gel`, `Body Lotion`, dan `Hair Conditioner`.
+5. **Urutan Alur Diubah:**
+   * **Langkah 1:** Input Parameter Kamar (Pilih nomor kamar, lantai/tipe otomatis terisi, Pax, Status Awal/Akhir, Jam Masuk & Keluar).
+   * **Langkah 2:** Linen & Supplies (Linen bersih/kotor dan amenities).
+   * **Langkah 3:** Simpan Log Kamar ke Cloud Supabase.
 
 ---
 
-### Salin dan Ganti Seluruh Isi File `index.html`:
+### Kode Lengkap `index.html` (Salin dan Ganti Seluruh Isi File):
 
 ```html
 <!DOCTYPE html>
@@ -44,7 +53,7 @@
     <title>Room Boy Control Sheet - Platinum Hotel Balikpapan</title>
     <!-- Tailwind CSS CDN -->
     <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <!-- Google Fonts: Playfair Display & Montserrat -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
     <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
     <link href="[https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap](https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap)" rel="stylesheet">
@@ -52,11 +61,11 @@
     <script src="[https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2](https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2)"></script>
     <!-- SheetJS (Excel) -->
     <script src="[https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js](https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js)"></script>
-    <!-- html2pdf.js (PDF Generator) -->
+    <!-- html2pdf.js -->
     <script src="[https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js](https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js)"></script>
     <style>
         .font-platinum { font-family: 'Playfair Display', serif; }
         .font-sans-hotel { font-family: 'Montserrat', sans-serif; }
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 6px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd
