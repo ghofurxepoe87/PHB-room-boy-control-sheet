@@ -42,7 +42,8 @@
     <div id="authModal" class="fixed inset-0 z-50 bg-[#0b1329]/95 backdrop-blur-md flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden">
             <div class="bg-[#0d1b33] p-6 text-center border-b-4 border-[#caa365]">
-                <img src="logo-platinum-DaGEWbyZ (2).png" class="h-12 mx-auto mb-2 object-contain" alt="Platinum Hotel">
+                <!-- Memanggil Logo Baru dengan Encoding Spasi (%20) -->
+                <img src="logo-platinum-DaGEWbyZ%20(2).png" onerror="this.style.display='none'" class="h-14 mx-auto mb-2 object-contain" alt="Platinum Hotel">
                 <h2 class="text-white text-base font-extrabold tracking-wide uppercase">Housekeeping Portal</h2>
                 <p class="text-slate-300 text-xs mt-1">Room Boy Control Sheet & Daily Occupancy</p>
             </div>
@@ -59,15 +60,17 @@
             <form id="authForm" onsubmit="handleAuthSubmit(event)" class="p-6 space-y-4 text-xs">
                 <div id="fieldFullName" class="hidden">
                     <label class="block font-bold text-slate-700 mb-1">Nama Lengkap Petugas</label>
-                    <input type="text" id="authFullName" placeholder="Contoh: Budi Santoso" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none font-medium">
+                    <input type="text" id="authFullName" value="Toni Room Boy" placeholder="Contoh: Budi Santoso" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none font-medium">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Username</label>
-                    <input type="text" id="authUsername" required placeholder="Masukkan username" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none font-bold text-slate-900">
+                    <!-- Username Default Toni -->
+                    <input type="text" id="authUsername" value="toni" required placeholder="Masukkan username" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none font-bold text-slate-900">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Password</label>
-                    <input type="password" id="authPassword" required placeholder="Masukkan password" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none">
+                    <!-- Password Default 123456 -->
+                    <input type="password" id="authPassword" value="123456" required placeholder="Masukkan password" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg outline-none">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Pilih Shift Hari Ini</label>
@@ -93,8 +96,8 @@
         <!-- HEADER -->
         <header class="bg-white rounded-2xl shadow-sm border border-slate-200/90 p-4 md:p-5 flex flex-wrap justify-between items-center gap-4 transition-all">
             <div class="flex items-center gap-4">
-                <div class="p-1 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
-                    <img src="logo-platinum-DaGEWbyZ (2).png" alt="Platinum Hotel" class="h-11 md:h-14 w-auto object-contain">
+                <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center">
+                    <img src="logo-platinum-DaGEWbyZ%20(2).png" onerror="this.style.display='none'" alt="Platinum Hotel" class="h-10 md:h-12 w-auto object-contain">
                 </div>
                 <div class="hidden sm:block border-l-2 border-slate-200 pl-4">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 border border-blue-200 rounded-md text-[11px] font-extrabold text-[#0d1b33] uppercase tracking-wider">
@@ -730,7 +733,7 @@
                 <div style="font-family: Arial, sans-serif; color: #1e293b; background: #fff; padding: 15px;">
                     <div style="display: flex; justify-content: space-between; border-bottom: 3px solid #0d2847; padding-bottom: 12px; margin-bottom: 15px;">
                         <div style="display: flex; align-items: center; gap: 15px;">
-                            <img src="logo-platinum-DaGEWbyZ (2).png" style="height: 50px;">
+                            <img src="logo-platinum-DaGEWbyZ%20(2).png" style="height: 50px;">
                             <div style="border-left: 2px solid #cbd5e1; padding-left: 12px;">
                                 <div style="font-size: 13px; font-weight: 900; color: #0d2847;">HOUSEKEEPING DEPARTMENT</div>
                                 <div style="font-size: 11px; font-weight: bold; color: #caa365;">ROOM BOY DAILY CONTROL SHEET</div>
