@@ -396,7 +396,8 @@
 
         // ================= INISIALISASI HALAMAN ================= //
         window.addEventListener('DOMContentLoaded', () => {
-            const today = new Date().toISOString().split('T')[0];
+            // Tanggal otomatis mendeteksi hari ini berdasarkan perangkat
+            const today = new Date().toLocaleDateString('en-CA'); 
             document.getElementById('currentDateDisplay').innerText = today;
             document.getElementById('filterDateStart').value = today;
             document.getElementById('filterDateEnd').value = today;
@@ -614,7 +615,7 @@
                 linen_change: updatePreviewSummary() !== 'Belum ada barang diubah.' ? updatePreviewSummary() : '-',
                 linen_data: JSON.parse(JSON.stringify(linenItems)),
                 amenities_data: JSON.parse(JSON.stringify(amenitiesItems)),
-                date: new Date().toISOString().split('T')[0]
+                date: new Date().toLocaleDateString('en-CA')
             };
 
             try {
@@ -653,7 +654,6 @@
             
             renderTodayTable(allLogs);
             
-            // Selalu proses filter agar PDF siap diunduh kapan saja
             applyGlobalReportFilter();
         }
 
@@ -729,7 +729,7 @@
                 "Pemakaian Barang": i.linen_change, "Maintenance": i.maintenance, "Catatan": i.remarks
             })));
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Control_Sheet");
-            XLSX.writeFile(wb, `Housekeeping_PHB_${new Date().toISOString().slice(0,10)}.xlsx`);
+            XLSX.writeFile(wb, `Housekeeping_PHB_${new Date().toLocaleDateString('en-CA')}.xlsx`);
         };
 
         function buildOfficialPrintHTML() {
@@ -797,7 +797,7 @@
             document.body.appendChild(box);
             
             setTimeout(() => {
-                html2pdf().set({ margin: [8,8,8,8], filename: `Laporan_PHB_${new Date().toISOString().slice(0,10)}.pdf`, html2canvas: { scale: 2, useCORS: true }, jsPDF: { format: 'a4', orientation: 'landscape' } }).from(box).save().then(() => document.body.removeChild(box)).catch(err => { console.error(err); alert("Gagal PDF"); document.body.removeChild(box);});
+                html2pdf().set({ margin: [8,8,8,8], filename: `Laporan_PHB_${new Date().toLocaleDateString('en-CA')}.pdf`, html2canvas: { scale: 2, useCORS: true }, jsPDF: { format: 'a4', orientation: 'landscape' } }).from(box).save().then(() => document.body.removeChild(box)).catch(err => { console.error(err); alert("Gagal PDF"); document.body.removeChild(box);});
             }, 500);
         };
 
